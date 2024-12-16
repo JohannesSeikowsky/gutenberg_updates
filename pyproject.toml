@@ -1,0 +1,15 @@
+[project]
+name = "python-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "openai>=1.55.0",
+    "pydantic>=2.10.1",
+    "requests>=2.32.3",
+    "textstat>=0.7.4",
+    "tiktoken>=0.8.0",
+    "wikipedia>=1.4.0",
+]

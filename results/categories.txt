@@ -1,0 +1,8 @@
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74088,427);
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74088,453);
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74089,486);
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74089,458);
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74090,458);
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74090,466);
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74091,486);
+insert into mn_books_bookshelves (fk_books,fk_bookshelves) values (74091,458);
