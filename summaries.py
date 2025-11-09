@@ -2,8 +2,11 @@ from openai import OpenAI
 import tiktoken
 import json
 import os
+from dotenv import load_dotenv
 from utils import *
-openai_client = OpenAI(api_key="REDACTED_API_KEY")
+
+load_dotenv()
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def get_first_chunk(text, max_token_size, encoding_name="cl100k_base"):
@@ -73,12 +76,12 @@ def summarise_beginning_of_book(title_and_author, text):
   
   In you writing use simple, clear, concise and expressive language.
   State the name of the book and the author's name only once throughout your response.
-  In some cases there may be a more apporpriate word than "book" to refer to the work I'll give you. Use your judgement to use appropriate terminology. Always write in English."""}
+  In some cases there may be a more apporpriate word than "book" to refer to the work I'll give you. Use your judgement to use appropriate terminology. Always write in English. And never include any urls in your response."""}
   
     prompt2 = {"role": "assistant", "content": "Understood! Please provide the opening portion of the book and I will follow your instructions."}
   
     prompt3 = {"role": "user", "content": "START OF BOOK BEGINNING: \n" + text + "\nEND OF BOOK BEGINNING"}
-    response = openai_client.chat.completions.create(model="gpt-4o-mini", messages=[system_prompt, prompt1, prompt2, prompt3])
+    response = openai_client.chat.completions.create(model="gpt-5", messages=[system_prompt, prompt1, prompt2, prompt3])
     response = response.choices[0].message.content
     return response
 
@@ -103,11 +106,11 @@ def summarise_entire_book(title_and_author, text):
   Overall this summary should be relatively brief.
 
   In you writing use simple, clear, consise and expressive language.
-  State the name of the book and the author's name only once throughout your response. Always write in English."""}
+  State the name of the book and the author's name only once throughout your response. Always write in English. And never include any urls in your response."""}
   prompt2 = {"role": "assistant", "content": "Understood! Please provide the book and I will follow your instructions."}
   prompt3 = {"role": "user", "content": "START OF BOOK: \n" + text + "\nEND OF BOOK"}
 
-  response = openai_client.chat.completions.create(model="gpt-4o-mini", messages=[system_prompt, prompt1, prompt2, prompt3])
+  response = openai_client.chat.completions.create(model="gpt-5", messages=[system_prompt, prompt1, prompt2, prompt3])
   response = response.choices[0].message.content
   return response
 
@@ -126,31 +129,26 @@ def format_result(result):
 def summarise_book(book_id):
     # print("Doing: ", book_id)
     chunk_size = 24000
-    try:
-        title_and_author = fetch_title_and_author_from_website(book_id)
-        print(title_and_author)
-        book, url = get_book_content_by_id(book_id)
-        # print(count_tokens(book))
-        if count_tokens(book) > chunk_size:
-            # print("Summarising only the beginning.")
-            beginning_of_book = get_first_chunk(book, chunk_size)
-            summary = summarise_beginning_of_book(title_and_author, beginning_of_book)
-        else:
-            # print("Summarising the entire book.")
-            summary = summarise_entire_book(title_and_author, book)
-        summary = format_result(summary)
-        return summary
-    except Exception as e:
-        print(f"Summary Error. book {book_id}. {e}")
+    title_and_author = fetch_title_and_author_from_website(book_id)
+    print("Summarising: ", title_and_author)
+    book, url = get_book_content_by_id(book_id)
+    # print(count_tokens(book))
+    if count_tokens(book) > chunk_size:
+        # print("Summarising only the beginning.")
+        beginning_of_book = get_first_chunk(book, chunk_size)
+        summary = summarise_beginning_of_book(title_and_author, beginning_of_book)
+    else:
+        # print("Summarising the entire book.")
+        summary = summarise_entire_book(title_and_author, book)
+    summary = format_result(summary)
+    return summary
 
 
-
-def save_summary(book_id, summary):
-    # construct and save sql-queries
+def save_summary(book_id, summary, file):
     beginning = "insert into attributes (fk_books,fk_attriblist,text,nonfiling) values (" + str(book_id) + ",520,'"
     note = " (This is an automatically generated summary.)"
     end = "',0);"
     sql = beginning + str(summary) + note + end
 
-    with open("./results/summaries.txt", "a") as f:
+    with open(file, "a") as f:
         f.write(f"{sql}\n")

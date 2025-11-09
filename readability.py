@@ -4,17 +4,13 @@ from utils import get_latest_book_id, cut_beginning, cut_end
 
 
 def calculate_readability(book_id):
-  try:
-    url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt"
-    book = requests.get(url).text
-    book = cut_beginning(book)
-    book = cut_end(book)
-    reading_score = textstat.flesch_reading_ease(book)
-    # print(f"Score: {reading_score}")
-    return reading_score
-  except Exception as e:
-    print(f"Readability Error. book {book_id}. {e}")
-
+  url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt"
+  book = requests.get(url).text
+  book = cut_beginning(book)
+  book = cut_end(book)
+  reading_score = textstat.flesch_reading_ease(book)
+  # print(f"Score: {reading_score}")
+  return reading_score
 
 
 def generate_sql(book_id, score):
@@ -34,10 +30,14 @@ def generate_sql(book_id, score):
 
   for min_score, max_score, grade, description in ranges:
       if min_score <= score <= max_score:
-          return f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},500,'Reading ease score: {score:.1f} ({grade}). {description}',0);"
+          return f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},908,'Reading ease score: {score:.1f} ({grade}). {description}',0);"
 
 
-def save_readability(book_id, readability_score):
-  sql = generate_sql(book_id, readability_score)  
-  with open("./results/readability.txt", "a") as f:
+def save_readability(book_id, readability_score, file):
+  sql = generate_sql(book_id, readability_score)
+  with open(file, "a") as f:
     f.write(f"{sql}\n")
+
+
+# r = generate_sql(76687, calculate_readability(76687))
+# print(r)

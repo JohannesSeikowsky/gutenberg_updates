@@ -1,0 +1,11 @@
+76736, Wiki for Authors Error, cannot access local variable 'prompt' where it is not associated with a value
+76810, Wiki for Books Error, HTTPSConnectionPool(host='www.gutenberg.org', port=443): Max retries exceeded with url: /ebooks/76810 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x74400c371ca0>: Failed to resolve 'www.gutenberg.org' ([Errno -2] Name or service not known)"))
+76920, Summary Error, cannot unpack non-iterable NoneType object
+76920, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+76920, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+76962, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+76962, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+77077, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+77077, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+77083, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+77083, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'

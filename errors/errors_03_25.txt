@@ -1,0 +1,18 @@
+75581, Summary Error, cannot unpack non-iterable NoneType object
+75581, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+75581, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+75603, Summary Error, cannot unpack non-iterable NoneType object
+75603, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+75603, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+75604, Summary Error, cannot unpack non-iterable NoneType object
+75604, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+75604, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+75605, Summary Error, cannot unpack non-iterable NoneType object
+75605, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+75605, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+75606, Summary Error, cannot unpack non-iterable NoneType object
+75606, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+75606, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'
+75607, Summary Error, cannot unpack non-iterable NoneType object
+75607, Wiki for Books Error, 'NoneType' object has no attribute 'find_all'
+75607, Wiki for Authors Error, 'NoneType' object has no attribute 'find_all'

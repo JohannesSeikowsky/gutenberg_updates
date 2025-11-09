@@ -8,7 +8,11 @@ from openai import OpenAI
 import requests
 from bs4 import BeautifulSoup
 import sys
-client = OpenAI(api_key="REDACTED_API_KEY")
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def check_english_wikipedia_page(book_title, content):
@@ -31,7 +35,7 @@ def check_english_wikipedia_page(book_title, content):
     prompt3 = f"""Ok. Now please provide me with an excerpt from a wikipedia article. I will read the excerpt carefully and based on my reading decide whether the wikipedia article it's taken from is the wikipedia article of: '{book_title}'"""
 
     completion = client.beta.chat.completions.parse(
-        model="gpt-4o",
+        model="gpt-5",
         messages=[{"role": "system", "content": system_prompt},{"role": "user", "content": prompt1}, {"role": "assistant", "content": prompt2}, {"role": "user", "content": book_title}, {"role": "assistant", "content": prompt3}, {"role": "user", "content": content}],
         response_format=Choice,
     )
@@ -61,7 +65,7 @@ def check_non_english_wikipedia_page(book_title, content, language):
     prompt3 = f"""Ok. Now please provide me with an excerpt from a wikipedia article. I will read the excerpt carefully and based on my reading decide whether the wikipedia article it's taken from is the wikipedia article of: '{book_title}'"""
 
     completion = client.beta.chat.completions.parse(
-        model="gpt-4o",
+        model="gpt-5",
         messages=[{"role": "system", "content": system_prompt},{"role": "user", "content": prompt1}, {"role": "assistant", "content": prompt2}, {"role": "user", "content": book_title}, {"role": "assistant", "content": prompt3}, {"role": "user", "content": content}],
         response_format=Choice,
     )
@@ -128,7 +132,7 @@ def google_search_with_serper(query):
         "q": query,
         "num": 20 })
 
-    headers = { 'X-API-KEY': 'abcfe6ae08cbdb59fdf7aceec193a52855e912a1',
+    headers = { 'X-API-KEY': os.getenv("SERPER_API_KEY"),
                 'Content-Type': 'application/json'}
     response = requests.request("POST", url, headers=headers, data=payload)
     return response.text
@@ -142,88 +146,78 @@ def get_urls_from_search_results(search_results):
     return urls
 
 
+def book_has_wiki(book_id):
+    "check whether there already is a wikipedia page on gutenberg.org"
+    url = f"https://www.gutenberg.org/ebooks/{book_id}"
+    r = requests.get(url).text
+    soup = BeautifulSoup(r, 'html.parser')
+    table = soup.find('table', class_='bibrec')
+    # wikipedia.org anywhere in this table?
+    table_rows = table.find_all('td')
+    if any("wikipedia.org" in row.text for row in table_rows):
+      return True
+    else:
+      return False
 
 
-def get_wikipedia_links(book_id):
-  try:
+def get_book_wikipedia_links(book_id):
     # print(f"{book_id}")
     title, language = get_title_and_language(book_id)
-    print(book_id, title)
+    # print(book_id, title)
     search_results = google_search_with_serper(title + " wikipedia")
     search_urls = get_urls_from_search_results(search_results)
     wikipedia_urls = [url for url in search_urls if "wikipedia.org" in url]
     urls = exclude_unwanted_links(wikipedia_urls)
+    # print(urls)
     english_urls = get_only_english_links(wikipedia_urls)
     non_english_urls = get_non_english_links(wikipedia_urls)
     results = []
-  
+    
     for url in english_urls:
-      print("CHECKING ", url)
+      # print("CHECKING ", url)
       try:
-          try:
-              content = get_wikipedia_summary(url)
-          except Exception as e:
-              print(f"Error for getting wikipedia summary for {url}: {e}")
-              record_error(f"Error for using wikipedia summary api for {url}: {e}", "errors.log")
-              continue
-          try:
-              is_english_wikipedia_page = check_english_wikipedia_page(title, content)
-          except Exception as e:
-              print(f"Error for checking english wikipedia page for {url}: {e}")
-              record_error(f"Error for checking wikipedia page with chatgpt for {url}: {e}", "errors.log")
-              continue
+          content = get_wikipedia_summary(url)
+          # print(content)
+          is_english_wikipedia_page = check_english_wikipedia_page(title, content)
           if is_english_wikipedia_page:
-              print("yes")
+              # print("yes")
               results.append(url)
               break
           else:
-              print("no")
+              pass
+              # print("no")
       except Exception as e:
           print(f"Error for checking particular url")
           
     
     # If the book is not english, look for non-english wikipedia results
     if language != "English":
-      #print("LOOKING FOR NON-ENGLISH WIKIPEDIA")
-      #print("CHECKING NON-ENGLISH URLS: ", non_english_urls)
       for url in non_english_urls:
-          print("CHECKING ", url)
+          # print("CHECKING ", url)
           try:
-              try:
-                  content = get_wikipedia_summary(url)
-              except Exception as e:
-                  print(f"Error for getting wikipedia summary for {url}: {e}")
-                  record_error(f"Error for using wikipedia summary api for {url}: {e}", "errors.log")
-                  continue
-              try:
-                  is_non_english_wikipedia_page = check_non_english_wikipedia_page(title, content, language)
-              except Exception as e:
-                  print(f"Error for checking non-english wikipedia page for {url}: {e}")
-                  record_error(f"Error for checking wikipedia page with chatgpt for {url}: {e}", "errors.log")
-                  continue
+              content = get_wikipedia_summary(url)
+              is_non_english_wikipedia_page = check_non_english_wikipedia_page(title, content, language)
               if is_non_english_wikipedia_page:
-                  print("yes")
+                  # print("yes")
                   results.append(url)
                   break
               else:
-                  print("no")
+                  pass
           except Exception as e:
               print(f"Error for checking particular url")
-
+        
     return results
-  except Exception as e:
-      print("Wikipedia link error for book id: ", book_id, " Error: ", e)
-  time.sleep(5)
     
 
-
-def save_book_wikis(book_id, urls):
+def save_book_wikis(book_id, urls, file):
     # convert your results into sql queries (but exclude legacy links)
     if urls: # Exclude books without urls
         urls = " ".join(urls)
         sql = f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},500,'{urls}',0);"
-        print("SQL: ", sql)
-        
-        # save results
-        with open('./results/wiki_for_books.txt', 'a') as f:
+        with open(file, 'a') as f:
             f.write(f"{sql}\n")
+
+
+
+# r = get_book_wikipedia_links(76688)
+# print(r)
