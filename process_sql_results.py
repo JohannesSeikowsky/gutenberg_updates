@@ -1,10 +1,3 @@
-
-# insert into attributes (fk_books,fk_attriblist,text,nonfiling) values (76714,500,'https://en.wikipedia.org/wiki/The_Little_Review',0);
-# insert into attributes (fk_books,fk_attriblist,text,nonfiling) values (76724,500,'https://en.wikipedia.org/wiki/The_Chase_of_the_Golden_Meteor https://fr.wikipedia.org/wiki/La_Chasse_au_m%C3%A9t%C3%A9ore',0);
-# insert into author_urls (fk_authors, description, url) values (57752,'fi.wikipedia','https://fi.wikipedia.org/wiki/Matti_Kivek%C3%A4s');
-
-{57752: "'fi.wikipedia', 'https://fi.wikipedia.org/wiki/Matti_Kivek%C3%A4s'"}
-{76724: "'https://en.wikipedia.org/wiki/The_Chase_of_the_Golden_Meteor https://fr.wikipedia.org/wiki/La_Chasse_au_m%C3%A9t%C3%A9ore'"}
 import json
 import os
 

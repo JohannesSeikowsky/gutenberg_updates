@@ -1,10 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import smtplib
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -106,22 +102,3 @@ def record_latest_completed_id(book_id):
 
 def get_latest_completed_id():
     return int(open("latest_id.txt", "r").read())
-
-
-def email_with_attachment(recipient, subject_line, content, file_content, file_name):
-    SMTP_SERVER = "smtp.mail.yahoo.com"
-    SMTP_PORT = 587
-    SMTP_USERNAME = os.getenv("SMTP_USERNAME")
-    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-    EMAIL_FROM = os.getenv("SMTP_USERNAME")
-    EMAIL_TO = recipient; msg = MIMEMultipart()
-    msg['Subject'] = subject_line
-    msg['From'] = EMAIL_FROM
-    msg['To'] = EMAIL_TO; msgText = MIMEText(content); msg.attach(msgText); text = MIMEText(file_content); text.add_header("Content-Disposition", "attachment", filename=file_name); msg.attach(text)
-    debuglevel = True
-    mail = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-    mail.set_debuglevel(debuglevel)
-    mail.starttls()
-    mail.login(SMTP_USERNAME, SMTP_PASSWORD)
-    mail.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
-    mail.quit()

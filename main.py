@@ -72,31 +72,6 @@ for book_id in range(from_id+1, to_id+1):
   record_latest_completed_id(book_id)
   print("---------------------  ")
 
-
-
-
-# # Email results to me
-# recipient = "joseikowsky@gmail.com"
-# subject_line = f"Gutenberg Updates for {current_month}.{current_year}"
-# content = ""
-# file_content = open(results_file, "r").read()
-# file_name = f"updates_{current_month}_{current_year}.txt"
-# email_with_attachment(recipient, subject_line, content, file_content, file_name)
-# time.sleep(6)
-
-# # Email errors to me
-# subject_line = f"Errors"
-# content = ""  
-# if os.path.exists(errors_file):
-#   file_content = open(errors_file, "r").read()
-# else:
-#   subject_line = "No Errors found."
-#   file_content = ""
-# file_name = f"errors_{current_month}_{current_year}.txt"
-# email_with_attachment(recipient, subject_line, content, file_content, file_name)
-
-
-
 # run code once a month on 28th -- cal entry
 # download & run code locally // o repl?
 
