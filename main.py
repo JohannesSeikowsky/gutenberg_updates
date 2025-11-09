@@ -1,4 +1,13 @@
-# Update New Releases on Gutenberg
+# Main Script
+# Goes over all new book release on Gutenberg and for each generates:
+# - Summary
+# - Wikipedia links for the book
+# - Readability score
+# - Categories
+# - Wikipedia links for the authors
+
+# the results get saved in results files in the results folder.
+
 from summaries import summarise_book, save_summary
 from readability import calculate_readability, save_readability
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis, book_has_wiki
