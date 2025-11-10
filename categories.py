@@ -17,7 +17,6 @@ categories_list = [category.split(", ", 1)[1] for category in categories.split("
 categories = "\n".join(categories_list)
 
 
-
 def get_categories(book_id, summary):
   system_prompt = f"""You are an expert at choosing appropriate categories for books. You do this by thoroughly reading the summary of a book to cultivate an understanding of what the book is about. In doing so you think critically about what the central topic or topics of the book are and what the peripheral topic or topics are. Just because certain "matching words" appear in the summary does not mean that the book is about that topic. You must read the summary carefully and think about what the book is actually about. Then and only then you pick appropriate categories for the book from this particular list of available categories:
 

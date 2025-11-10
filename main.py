@@ -6,7 +6,7 @@
 # - Categories
 # - Wikipedia links for the authors
 
-# the results get saved in results files in the results folder.
+# Results get saved in the results/ directory in a file named after the current month.
 
 from summaries import summarise_book, save_summary
 from readability import calculate_readability, save_readability
@@ -23,13 +23,12 @@ to_id = get_latest_book_id()
 print("From: ", from_id, "To: ", to_id)
 print("---")
 
+now = datetime.now()
+results_file = f"results/update_{now.strftime('%m_%y')}.txt"
+errors_file = f"errors/errors_{now.strftime('%m_%y')}.txt"
+
 for book_id in range(from_id+1, to_id+1):
   print("Book: ", book_id)
-  now = datetime.now()
-  current_month = now.strftime("%m")
-  current_year = now.strftime("%y")
-  results_file = f"results/update_{current_month}_{current_year}.txt"
-  errors_file = f"errors/errors_{current_month}_{current_year}.txt"
 
   try:
     summary = summarise_book(book_id)
@@ -77,27 +76,5 @@ for book_id in range(from_id+1, to_id+1):
     record_error(f"{book_id}, Wiki for Authors Error, {e}", errors_file)
   time.sleep(3)
   
-  # record id of the latest book that has been processed
   record_latest_completed_id(book_id)
   print("---------------------  ")
-
-# run code once a month on 28th -- cal entry
-# download & run code locally // o repl?
-
-
-# with open("check_category_results.txt", "w") as f:
-#   test_set = open("categories_test.txt").read().split("\n")
-#   for query in test_set:
-#     try:
-#       book_id = query.split("values (")[1].split(",520")[0]
-#       summary = query.split("520,'")[1].split(" (This is an automatically")[0]   
-#       category_choice = get_categories(book_id, summary)
-#       category_ids = save_categories(book_id, category_choice)
-#       print(book_id)
-#       print(summary)
-#       print(category_choice)
-#       print(category_ids)
-#       print("---")
-#       f.write(f"{book_id}\n{summary}\n{category_choice}\n{category_ids}\n---\n")
-#     except Exception as e:
-#       print(e)
