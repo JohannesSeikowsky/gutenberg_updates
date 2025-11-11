@@ -8,73 +8,80 @@
 
 # Results get saved in the results/ directory in a file named after the current month.
 
+import time
+from datetime import datetime
+
 from summaries import summarise_book, save_summary
 from readability import calculate_readability, save_readability
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis, book_has_wiki
 from wiki_for_authors import get_author_wikipedia_links
 from categories import get_categories, save_categories
 from utils import *
-from datetime import datetime
-import time
-import os
 
-from_id = get_latest_completed_id()
-to_id = get_latest_book_id()
-print("From: ", from_id, "To: ", to_id)
+STEP_DELAY = 1
+
+start_id = get_latest_completed_id()
+end_id = get_latest_book_id()
+print(f"Processing books {start_id + 1} to {end_id}")
 print("---")
 
-now = datetime.now()
-results_file = f"results/update_{now.strftime('%m_%y')}.txt"
-errors_file = f"errors/errors_{now.strftime('%m_%y')}.txt"
+month_year = datetime.now().strftime('%m_%y')
+results_file = f"results/update_{month_year}.txt"
+errors_file = f"errors/errors_{month_year}.txt"
 
-for book_id in range(from_id+1, to_id+1):
-  print("Book: ", book_id)
+for book_id in range(start_id + 1, end_id + 1):
+    print(f"Book: {book_id}")
 
-  try:
-    summary = summarise_book(book_id)
-    print(summary + "\n\n")
-    save_summary(book_id, summary, results_file)
-  except Exception as e:
-    print("Summary Error\n\n")
-    record_error(f"{book_id}, Summary Error, {e}", errors_file)
-  time.sleep(1)
+    # Generate summary
+    try:
+        summary = summarise_book(book_id)
+        print(f"Summary: {summary}")
+        save_summary(book_id, summary, results_file)
+    except Exception as e:
+        print("Summary: Error")
+        record_error(f"{book_id}, Summary, {e}", errors_file)
+    time.sleep(STEP_DELAY)
 
-  try:
-    if not book_has_wiki(book_id):
-      wiki_links = get_book_wikipedia_links(book_id)
-      print("Wikis for Book:", wiki_links, "\n\n")
-      save_book_wikis(book_id, wiki_links, results_file)
-    else:
-      print("Wiki for Book already on Gutenberg.\n\n")
-  except Exception as e:
-    print("Wiki for Books Error\n\n")
-    record_error(f"{book_id}, Wiki for Books Error, {e}", errors_file)
-  time.sleep(1)
+    # Find Wikipedia links for book
+    try:
+        if not book_has_wiki(book_id):
+            wiki_links = get_book_wikipedia_links(book_id)
+            print(f"Book wiki: {wiki_links}")
+            save_book_wikis(book_id, wiki_links, results_file)
+        else:
+            print("Book wiki: Already exists")
+    except Exception as e:
+        print("Book wiki: Error")
+        record_error(f"{book_id}, Book wiki, {e}", errors_file)
+    time.sleep(STEP_DELAY)
 
-  try:
-    readability = calculate_readability(book_id)
-    print("Readability:", readability, "\n\n")
-    save_readability(book_id, readability, results_file)
-  except Exception as e:
-    print("Readability Error\n\n")
-    record_error(f"{book_id}, Readability Error, {e}", errors_file)
-  time.sleep(1)
+    # Calculate readability score
+    try:
+        readability = calculate_readability(book_id)
+        print(f"Readability: {readability}")
+        save_readability(book_id, readability, results_file)
+    except Exception as e:
+        print("Readability: Error")
+        record_error(f"{book_id}, Readability, {e}", errors_file)
+    time.sleep(STEP_DELAY)
 
-  try:
-    categories = get_categories(book_id, summary)
-    print("Categories: ", categories, "\n\n")
-    save_categories(book_id, categories, results_file)
-  except Exception as e:
-    print("Categories Error\n\n")
-    record_error(f"{book_id}, Categories Error, {e}", errors_file)
-  time.sleep(1)
+    # Generate categories
+    try:
+        categories = get_categories(book_id, summary)
+        print(f"Categories: {categories}")
+        save_categories(book_id, categories, results_file)
+    except Exception as e:
+        print("Categories: Error")
+        record_error(f"{book_id}, Categories, {e}", errors_file)
+    time.sleep(STEP_DELAY)
 
-  try:
-    get_author_wikipedia_links(book_id, results_file) # saving in function itself.
-  except Exception as e:
-    print("Wiki for Authors Error\n\n")
-    record_error(f"{book_id}, Wiki for Authors Error, {e}", errors_file)
-  time.sleep(3)
-  
-  record_latest_completed_id(book_id)
-  print("---------------------  ")
+    # Find Wikipedia links for authors
+    try:
+        get_author_wikipedia_links(book_id, results_file)
+    except Exception as e:
+        print("Author wiki: Error")
+        record_error(f"{book_id}, Author wiki, {e}", errors_file)
+    time.sleep(STEP_DELAY)
+
+    record_latest_completed_id(book_id)
+    print("---------------------")
