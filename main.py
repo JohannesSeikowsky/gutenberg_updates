@@ -1,22 +1,21 @@
 # Main Script
-# Goes over all new book release on Gutenberg and for each generates:
+# Goes over all new book releases on Gutenberg since the last update was run and for each generates:
 # - Summary
 # - Wikipedia links for the book
 # - Readability score
 # - Categories
 # - Wikipedia links for the authors
-
-# Results get saved in the results/ directory in a file named after the current month.
+# Results get saved in "results/", Errors in "errors/". Both in a file named after the current month.
+# Results are saved as SQL INSERT statements (as requested by Greg).
 
 import time
 from datetime import datetime
-
+from utils import *
 from summaries import summarise_book, save_summary
 from readability import calculate_readability, save_readability
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis, book_has_wiki
 from wiki_for_authors import get_author_wikipedia_links
 from categories import get_categories, save_categories
-from utils import *
 
 STEP_DELAY = 1
 

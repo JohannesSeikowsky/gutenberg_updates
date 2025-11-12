@@ -11,7 +11,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Parse the categories and their ids into required structures
 with open("categories.txt") as f:
-    parsed = [line.split(", ", 1) for line in f if line.strip() and line.split(", ")[0].isnumeric()]
+    parsed = [line.strip().split(", ", 1) for line in f if line.strip() and line.split(", ")[0].isnumeric()]
 
 category_name_to_id = {name: id for id, name in parsed}
 categories_list = [name for _, name in parsed]
