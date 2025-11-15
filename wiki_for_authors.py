@@ -39,7 +39,7 @@ def get_authors(book_id):
 
 
 def get_book_titles(author_id):
-    "get the titles of the works than an author has on Gutenberg"
+    "get the titles of the works that an author has on Gutenberg"
     url = f"https://www.gutenberg.org/ebooks/author/{author_id}"
     r = requests.get(url)    
     re = BeautifulSoup(r.text, 'html.parser')
