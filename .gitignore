@@ -36,3 +36,4 @@ replit.nix
 
 # Lock files (keeping requirements.txt as the source of truth)
 uv.lock
+CLAUDE.md
