@@ -48,28 +48,92 @@ def get_latest_book_id():
 
 def get_book_content_by_id(book_id):
     url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (compatible; GutenbergContent/1.0; +https://github.com)'
+    }
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an exception for bad status codes
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
         book = cut_end(cut_beginning(response.text))
-        return book, url
+        return book
     except requests.RequestException as e:
         print(f"Error fetching book from website: {e}")
         return None
 
 
-def fetch_title_and_author_from_website(book_id):
-  url = f"https://www.gutenberg.org/ebooks/{book_id}"
-  try:
-      response = requests.get(url)
-      soup = BeautifulSoup(response.content, 'html.parser')
-      content_div = soup.find('div', id='content')
-      title_tag = content_div.find('h1') if content_div else None
-      title = title_tag.text.strip() if title_tag else "Title not found"
-      return title
-  except requests.RequestException as e:
-      print(f"Error fetching book details: {e}")
-      return None
+def get_book_metadata(book_id):
+    """
+    Fetch all book metadata from Project Gutenberg in one request.
+    Returns tuple: (title, language, authors, has_wiki_link)
+    Always returns a tuple with defaults if data is unavailable.
+    """
+    url = f"https://www.gutenberg.org/ebooks/{book_id}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (compatible; GutenbergMetadata/1.0; +https://github.com)'
+    }
+
+    # Default values
+    result = {
+        'title': None,
+        'language': None,
+        'authors': [],
+        'has_wiki_link': False
+    }
+
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Extract title
+        content_div = soup.find('div', id='content')
+        title_tag = content_div.find('h1') if content_div else None
+        if title_tag:
+            result['title'] = title_tag.text.strip()
+
+        # Extract language
+        bibrec_table = soup.find('table', class_='bibrec')
+        if bibrec_table:
+            for row in bibrec_table.find_all('tr'):
+                header = row.find('th')
+                if header and 'Language' in header.text:
+                    data = row.find('td')
+                    if data:
+                        result['language'] = data.text.strip()
+                        break
+
+        # Extract authors (with IDs, names, life dates, roles)
+        if bibrec_table:
+            for row in bibrec_table.find_all('tr'):
+                header = row.find('th')
+                if header:
+                    role = header.text.strip()
+                    if role in ['Author', 'Editor', 'Translator', 'Contributor', 'Illustrator']:
+                        data = row.find('td')
+                        if data:
+                            link = data.find('a', href=True)
+                            if link and '/ebooks/author/' in link['href']:
+                                author_id = link['href'].split('/')[-1]
+                                name = link.text.strip()
+                                life_dates = data.text.replace(name, '').strip(' ()')
+                                result['authors'].append({
+                                    'id': author_id,
+                                    'name': name,
+                                    'life_dates': life_dates,
+                                    'role': role
+                                })
+
+        # Check if book already has Wikipedia link
+        if bibrec_table:
+            for row in bibrec_table.find_all('tr'):
+                if 'wikipedia.org' in str(row):
+                    result['has_wiki_link'] = True
+                    break
+
+    except requests.RequestException as e:
+        print(f"Error fetching book metadata: {e}")
+
+    return result['title'], result['language'], result['authors'], result['has_wiki_link']
 
 
 def cut_beginning(text):    
@@ -96,9 +160,11 @@ def record_error(error, file):
     with open(file, "a") as f:
         f.write(error + "\n")
 
+
 def record_latest_completed_id(book_id):
     with open("latest_id.txt", "w") as f:
         f.write(str(book_id))
+
 
 def get_latest_completed_id():
     return int(open("latest_id.txt", "r").read())

@@ -1,15 +1,8 @@
 import textstat
-import requests
-from utils import get_latest_book_id, cut_beginning, cut_end
 
 
-def calculate_readability(book_id):
-  url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt"
-  book = requests.get(url).text
-  book = cut_beginning(book)
-  book = cut_end(book)
-  reading_score = textstat.flesch_reading_ease(book)
-  # print(f"Score: {reading_score}")
+def calculate_readability(book_content):
+  reading_score = textstat.flesch_reading_ease(book_content)
   return reading_score
 
 

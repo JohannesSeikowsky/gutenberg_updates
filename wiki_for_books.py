@@ -6,7 +6,6 @@ import time
 from pydantic import BaseModel
 from openai import OpenAI
 import requests
-from bs4 import BeautifulSoup
 import sys
 import os
 from dotenv import load_dotenv
@@ -110,21 +109,6 @@ def record_error(error_message, log_file):
       f.write(f"{error_message}\n\n")
 
 
-def get_title_and_language(book_id):
-    url = f"https://www.gutenberg.org/ebooks/{book_id}"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    content_div = soup.find('div', id='content')
-    # get title
-    title_tag = content_div.find('h1') if content_div else None
-    title = title_tag.text.strip() if title_tag else "Title not found"
-    # get language
-    try:
-        language = soup.find('table', class_='bibrec').find('th', text='Language').parent.find('td').text.strip()        
-    except:
-        language = "Not Found"
-    return title, language
-
 
 def google_search_with_serper(query):
     url = "https://google.serper.dev/search"
@@ -146,23 +130,7 @@ def get_urls_from_search_results(search_results):
     return urls
 
 
-def book_has_wiki(book_id):
-    "check whether there already is a wikipedia page on gutenberg.org"
-    url = f"https://www.gutenberg.org/ebooks/{book_id}"
-    r = requests.get(url).text
-    soup = BeautifulSoup(r, 'html.parser')
-    table = soup.find('table', class_='bibrec')
-    # wikipedia.org anywhere in this table?
-    table_rows = table.find_all('td')
-    if any("wikipedia.org" in row.text for row in table_rows):
-      return True
-    else:
-      return False
-
-
-def get_book_wikipedia_links(book_id):
-    # print(f"{book_id}")
-    title, language = get_title_and_language(book_id)
+def get_book_wikipedia_links(title, language):
     # print(book_id, title)
     search_results = google_search_with_serper(title + " wikipedia")
     search_urls = get_urls_from_search_results(search_results)

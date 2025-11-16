@@ -126,20 +126,14 @@ def format_result(result):
     return summary
 
 
-def summarise_book(book_id):
-    # print("Doing: ", book_id)
+def summarise_book(book_content, title):
     chunk_size = 24000
-    title_and_author = fetch_title_and_author_from_website(book_id)
-    print("Summarising: ", title_and_author)
-    book, url = get_book_content_by_id(book_id)
-    # print(count_tokens(book))
-    if count_tokens(book) > chunk_size:
-        # print("Summarising only the beginning.")
-        beginning_of_book = get_first_chunk(book, chunk_size)
-        summary = summarise_beginning_of_book(title_and_author, beginning_of_book)
+    print("Summarising: ", title)
+    if count_tokens(book_content) > chunk_size:
+        beginning_of_book = get_first_chunk(book_content, chunk_size)
+        summary = summarise_beginning_of_book(title, beginning_of_book)
     else:
-        # print("Summarising the entire book.")
-        summary = summarise_entire_book(title_and_author, book)
+        summary = summarise_entire_book(title, book_content)
     summary = format_result(summary)
     return summary
 

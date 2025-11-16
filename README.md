@@ -4,6 +4,8 @@ The system runs once a month to process all books that have been newly published
 ## Architecture
 `main.py` is the main script that orchestrates the five-step pipeline for each book. It's deliberately very simple and straightforward. There's a separate file for each of the five steps: `summaries.py`, `categories.py`, `readability.py`, `wiki_for_books.py`, `wiki_for_authors.py`
 
+Right now all necessary data is obtained through scraping the Project Gutenberg page once for each book. The 2 relevant scraping functions are in `utils.py`. Maybe this can be integrated in a better way with the publishing process.
+
 To make the code easier to understand I added a comment at the top of each of these files describing their general logic briefly. I recommend reading those comments before trying to understand the code itself.
 
 ## Results

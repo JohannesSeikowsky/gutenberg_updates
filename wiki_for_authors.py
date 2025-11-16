@@ -7,45 +7,35 @@ import urllib.parse
 from perplexity import use_perplexity, perplexity_wiki_search
 
 
-def get_authors(book_id):
-    "get the author of a book and his/her life dates if available"
-    url = f"https://www.gutenberg.org/ebooks/{book_id}"
-    r = requests.get(url).text
-    soup = BeautifulSoup(r, 'html.parser')
-    table = soup.find('table', class_='bibrec')
-    table_rows = table.find_all('tr')
-    
-    titles = ["Author", "Editor", "Translator", "Illustrator", "Creator", "Commentator"]
-    ids = []
-    for row in table_rows:
-        try:
-            row_title = row.find("th").text
-        except:
-            continue
-        if row_title in titles:
-            author_id = row.find("td").find("a").get("href").split("/")[-1]
-            author = row.find("td").find("a").text.strip()
-            # separate life dates and name and format name.
-            if any(char.isdigit() for char in author.split(", ")[-1]):
-                life_dates = author.split(", ")[-1]
-                author = author.split(", ")[:-1]
-            else:
-                author = author.split(", ")
-                life_dates = None
-            author = " ".join(reversed(author)) # format name - first name first
-            if author_id.isnumeric():
-                ids.append({author_id: [author, life_dates]})
-    return ids
-
-
-def get_book_titles(author_id):
-    "get the titles of the works that an author has on Gutenberg"
+def get_author_metadata(author_id):
+    """
+    Fetch author metadata in one request.
+    Returns dict with: book_titles, has_wiki_link
+    """
     url = f"https://www.gutenberg.org/ebooks/author/{author_id}"
-    r = requests.get(url)    
-    re = BeautifulSoup(r.text, 'html.parser')
-    li_tags = re.find_all("li", class_="booklink")
-    titles = [book.find("span", class_="title").text for book in li_tags]
-    return titles
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (compatible; GutenbergAuthor/1.0; +https://github.com)'
+    }
+    try:
+        r = requests.get(url, headers=headers, timeout=10)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, 'html.parser')
+
+        # Get book titles
+        li_tags = soup.find_all("li", class_="booklink")
+        titles = [book.find("span", class_="title").text for book in li_tags]
+
+        # Check if author already has Wikipedia link
+        a_tags = soup.find_all("a")
+        has_wiki_link = any("wikipedia.org" in str(a.get("href")) for a in a_tags)
+
+        return {
+            'book_titles': titles,
+            'has_wiki_link': has_wiki_link
+        }
+    except requests.RequestException as e:
+        print(f"Error fetching author metadata: {e}")
+        return None
 
 
 def exclude_already_done_authors(authors):
@@ -87,18 +77,6 @@ def generate_sql(author_id, perplexity_answer):
     return sql
 
 
-def author_has_wiki(author_id):
-    "check whether there already is a wikipedia page on gutenberg.org"
-    url = f"https://www.gutenberg.org/ebooks/author/{author_id}"
-    r = requests.get(url).text
-    soup = BeautifulSoup(r, 'html.parser')
-    a_tags = soup.find_all("a")
-    if any("wikipedia.org" in str(a.get("href")) for a in a_tags):
-      return True
-    else:
-      return False
-        
-
 def save_author_wikipedia_links(author_id, wikipedia_link, results_file):
     sql = generate_sql(author_id, wikipedia_link)
     with open(results_file, "a") as f:
@@ -110,20 +88,38 @@ def record_author_as_done(author_id):
         f.write(author_id + "\n")
 
 
-def get_author_wikipedia_links(book_id, results_file):
-    authors = get_authors(book_id)
-    authors = exclude_already_done_authors(authors)
-    if not authors:
-        print("Author Wikis already done for all authors.")
-    
-    # Note - A book can have more than one author.
+def get_author_wikipedia_links(authors, results_file):
+    """
+    Find Wikipedia links for authors.
+    authors: list of author dicts from get_book_metadata()
+    """
+    # Convert to old format for compatibility with exclude_already_done_authors
+    authors_old_format = []
     for author in authors:
+        author_id = author['id']
+        name = author['name']
+        life_dates = author['life_dates']
+        authors_old_format.append({author_id: [name, life_dates]})
+
+    authors_old_format = exclude_already_done_authors(authors_old_format)
+    if not authors_old_format:
+        print("Author Wikis already done for all authors.")
+
+    # Note - A book can have more than one author.
+    for author in authors_old_format:
         author_id = list(author.keys())[0]
         author_name = list(author.values())[0][0]
         life_dates = list(author.values())[0][1]
-        if not author_has_wiki(author_id):
-            titles = get_book_titles(author_id)
-    
+
+        # Get author metadata (titles and wiki status) in one call
+        author_metadata = get_author_metadata(author_id)
+        if not author_metadata:
+            print(f"Author Wikis: Error fetching metadata for {author_id}")
+            record_author_as_done(author_id)
+            continue
+
+        if not author_metadata['has_wiki_link']:
+            titles = author_metadata['book_titles']
             perplexity_answer = perplexity_wiki_search(author_name, life_dates, titles)
             print("Author Wikis: ", perplexity_answer)
             if check_perplexity_answer(perplexity_answer):

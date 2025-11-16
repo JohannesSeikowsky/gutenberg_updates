@@ -1,0 +1,4 @@
+77116, Book wiki, name 'book_has_wiki' is not defined
+77116, Categories, name 'get_categories' is not defined
+77116, Author wiki, name 'get_author_wikipedia_links' is not defined
+77116, Categories, Error code: 400 - {'error': {'message': "Invalid schema for response_format 'book_categories': In context=('properties', 'categories', 'items'), \n is not allowed in string literals for structured outputs (strict=true).", 'type': 'invalid_request_error', 'param': 'response_format', 'code': None}}
