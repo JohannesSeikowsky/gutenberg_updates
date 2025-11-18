@@ -1,4 +1,6 @@
-# Assigns Project Gutenberg books to predefined categories using GPT and outputs SQL INSERT statements.
+# Assigns books to predefined categories using ChatGPT.
+# We have 72 categories in total, listed in categories.txt.
+# We're using a schema to force ChatGPT to pick only from our predefined list of categories and return a list of strings.
 
 from openai import OpenAI
 from utils import *

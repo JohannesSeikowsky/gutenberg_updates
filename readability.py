@@ -1,5 +1,7 @@
-import textstat
+# Calculates the readability score of a book using the Flesch-Kincaid readability test.
+# The exact score is then used to assign the book to a readability grade.
 
+import textstat
 
 def calculate_readability(book_content):
   reading_score = textstat.flesch_reading_ease(book_content)
@@ -30,7 +32,3 @@ def save_readability(book_id, readability_score, file):
   sql = generate_sql(book_id, readability_score)
   with open(file, "a") as f:
     f.write(f"{sql}\n")
-
-
-# r = generate_sql(76687, calculate_readability(76687))
-# print(r)

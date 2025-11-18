@@ -4,9 +4,9 @@ The system runs once a month to process all books that have been newly published
 ## Architecture
 `main.py` is the main script that orchestrates the five-step pipeline for each book. It's deliberately very simple and straightforward. There's a separate file for each of the five steps: `summaries.py`, `categories.py`, `readability.py`, `wiki_for_books.py`, `wiki_for_authors.py`
 
-Right now all necessary data is obtained through scraping the Project Gutenberg page once for each book. The 2 relevant scraping functions are in `utils.py`. Maybe this can be integrated in a better way with the publishing process.
+The data that's necessary to run this pipeline is obtained by scraping the Project Gutenberg page once for each book (lines 34-35 main.py). I suspect a better integration with the publishing process may be possible.
 
-To make the code easier to understand I added a comment at the top of each of these files describing their general logic briefly. I recommend reading those comments before trying to understand the code itself.
+To make the code easier to understand I added a comment at the beginning of each of the main code files briefly stating what's being done in general terms. I recommend reading those comments before trying to understand the code.
 
 ## Results
 Results are saved in the `results/` directory in a file named after the current month. They are saved in sql-queries as requested by Greg. The idea was that these sql quries could then be directly run to put the results into the database and thereby online. Eric asked to get the results in their original format instead (i.e. not within sql), so I added `process_sql_results.py` which parses them out of the sql and saves them in "processed_results/".

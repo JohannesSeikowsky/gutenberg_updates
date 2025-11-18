@@ -1,3 +1,8 @@
+# Finds Wikipedia links for books 
+# We're using Serper (Google search API) to search for wikipedia links related to the book.
+# Then we use ChatGPT to find the wikipedia link(s) that actually is about the book (not the author or a file or whatnot)  
+# For non-English books, we searche for both English and native language Wikipedia pages.
+
 from utils import *
 import json
 import wikipedia
@@ -109,7 +114,6 @@ def record_error(error_message, log_file):
       f.write(f"{error_message}\n\n")
 
 
-
 def google_search_with_serper(query):
     url = "https://google.serper.dev/search"
     payload = json.dumps({
@@ -184,8 +188,3 @@ def save_book_wikis(book_id, urls, file):
         sql = f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},500,'{urls}',0);"
         with open(file, 'a') as f:
             f.write(f"{sql}\n")
-
-
-
-# r = get_book_wikipedia_links(76688)
-# print(r)
