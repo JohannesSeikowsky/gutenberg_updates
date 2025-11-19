@@ -37,3 +37,4 @@ The code has been written in my limited free time and without the expectation th
 - Maybe there's a better way than scraping to get the necessary data into the pipeline. 
 - I havent had time to thoroughly check whether the error recording logic does a solid job.
 - The two "wiki" scripts use different approaches for finding Wikipedia links. Maybe one approach is better than the other.
+- Once we have code that generates summaries based on a Wikipedia articles for those books that have one, there needs to be a branching in the code since those books then obviously won't need a summary generated with the current method.
