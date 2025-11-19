@@ -32,8 +32,8 @@ Add API keys (OpenAI, Serper and Perplexity) to `.env`, then `pip install -r req
 The code has been written in my limited free time and without the expectation that it would ever be shared with anyone. It's thus largely unedited and unrefined. I've done some basic clean-up of some, but not all, parts of it.
 
 ## ToDo
-- Integration with the publishing Pipeline! Most important!!
-- Some parts of the code are unedited, as mentioned.
+- Integration with the continual publishing process of new books. Most important!!
+- Some parts of the code are unedited (as already mentioned).
 - Maybe there's a better way than scraping to get the necessary data into the pipeline. 
-- I havent had time to thoroughly check whether the error recording logic does a solid job of providing a good record of what went wrong after each run.
-- The two "wiki" scripts use two different methods for finding Wikipedia links. Maybe one is better than the other.
+- I havent had time to thoroughly check whether the error recording logic does a solid job.
+- The two "wiki" scripts use different approaches for finding Wikipedia links. Maybe one approach is better than the other.

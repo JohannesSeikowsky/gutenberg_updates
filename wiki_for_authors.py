@@ -1,8 +1,9 @@
 # Finds Wikipedia links for authors using Perplexity. 
-# Perplexity is a AI-based search engine. Kinda of a combination of Google search and an LLM.
+# Perplexity is an AI-based search engine. Kind of like a combination of Google search and an LLM.
 # Be aware that many books have more than one author (including translators etc.).
-# For each author who i not already on Gutenberg, we use Perplexity to search based on author name, life dates, and their book titles.
+# For each author who is not already on Gutenberg, we use Perplexity to search based on author name, life dates, and their book titles.
 # Read the prompting for a better understanding.
+# We're feeding in the other books by the author to give Perplexity more context to find the correct Wikipedia link.
 # Results are validated in a basic way to avoid obvious mistakes.
 
 import json

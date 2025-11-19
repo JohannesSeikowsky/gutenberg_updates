@@ -55,6 +55,32 @@ for book_id in range(start_id + 1, end_id + 1):
         summary = None
     time.sleep(STEP_DELAY)
 
+    # Generate categories
+    if summary:
+        try:
+            categories = get_categories(book_id, summary)
+            print(f"Categories: {categories}")
+            save_categories(book_id, categories, results_file)
+        except Exception as e:
+            print("Categories: Error")
+            record_error(f"{book_id}, Categories, {e}", errors_file)
+    else:
+        print("Categories: Skipped (missing summary)")
+    time.sleep(STEP_DELAY)
+
+    # Calculate readability score
+    if book_content:
+        try:
+            readability = calculate_readability(book_content)
+            print(f"Readability: {readability}")
+            save_readability(book_id, readability, results_file)
+        except Exception as e:
+            print("Readability: Error")
+            record_error(f"{book_id}, Readability, {e}", errors_file)
+    else:
+        print("Readability: Skipped (missing data)")
+    time.sleep(STEP_DELAY)
+
     # Find Wikipedia links for book
     if title and language:
         try:
@@ -71,41 +97,17 @@ for book_id in range(start_id + 1, end_id + 1):
         print("Book wiki: Skipped (missing data)")
     time.sleep(STEP_DELAY)
 
-    # Calculate readability score
-    if book_content:
-        try:
-            readability = calculate_readability(book_content)
-            print(f"Readability: {readability}")
-            save_readability(book_id, readability, results_file)
-        except Exception as e:
-            print("Readability: Error")
-            record_error(f"{book_id}, Readability, {e}", errors_file)
-    else:
-        print("Readability: Skipped (missing data)")
-    time.sleep(STEP_DELAY)
-
-    # Generate categories
-    if summary:
-        try:
-            categories = get_categories(book_id, summary)
-            print(f"Categories: {categories}")
-            save_categories(book_id, categories, results_file)
-        except Exception as e:
-            print("Categories: Error")
-            record_error(f"{book_id}, Categories, {e}", errors_file)
-    else:
-        print("Categories: Skipped (missing summary)")
-    time.sleep(STEP_DELAY)
-
     # Find Wikipedia links for authors
     if authors:
-        authors = exclude_already_done_authors(authors)
+        # authors = exclude_already_done_authors(authors)
+        if not authors:
+            print("Author wiki: All authors have already been processed before.")
         for author in authors:
             try:
                 author_id = author['id']
                 author_metadata = get_author_metadata(author_id)
 
-                if author_metadata and not author_metadata['has_wiki_link']:
+                if author_metadata: # and not author_metadata['has_wiki_link']:
                     wiki_link = get_author_wikipedia_link(author, author_metadata)
                     if wiki_link:
                         save_author_wikipedia_link(author_id, wiki_link, results_file)
@@ -113,7 +115,7 @@ for book_id in range(start_id + 1, end_id + 1):
                     else:
                         print("Author wiki: Not found")
                 else:
-                    print("Author wiki: Already exists")
+                    print("Author already has a Wikipedia link")
 
                 record_author_as_done(author_id)
             except Exception as e:
@@ -125,13 +127,3 @@ for book_id in range(start_id + 1, end_id + 1):
 
     record_latest_completed_id(book_id)
     print("---------------------")
-
-
-
-
-# Readme
-# done_authors.txt necessary?
-
-# important commments?
-# more simplification
-# data getting --> to be done in pipeline anyway
