@@ -164,7 +164,7 @@ def generate_sql(author_id, perplexity_answer):
     return sql
 
 
-def save_author_wikipedia_links(author_id, wikipedia_link, results_file):
+def save_author_wikipedia_link(author_id, wikipedia_link, results_file):
     sql = generate_sql(author_id, wikipedia_link)
     with open(results_file, "a") as f:
         f.write(sql + "\n")
@@ -175,35 +175,13 @@ def record_author_as_done(author_id):
         f.write(author_id + "\n")
 
 
-def get_author_wikipedia_links(authors, results_file):
-    """
-    Find Wikipedia links for authors.
-    authors: list of author dicts from get_book_metadata()
-    """
-    authors = exclude_already_done_authors(authors)
-    if not authors:
-        print("Author Wikis already done for all authors.")
-        return
+def get_author_wikipedia_link(author, author_metadata):
+    author_name = author['name']
+    life_dates = author['life_dates']
+    titles = author_metadata['book_titles']
 
-    for author in authors:
-        author_id = author['id']
-        author_name = author['name']
-        life_dates = author['life_dates']
+    perplexity_answer = perplexity_wiki_search(author_name, life_dates, titles)
 
-        author_metadata = get_author_metadata(author_id)
-        if not author_metadata:
-            print(f"Author Wikis: Error fetching metadata for {author_id}")
-            record_author_as_done(author_id)
-            continue
-
-        if not author_metadata['has_wiki_link']:
-            titles = author_metadata['book_titles']
-            perplexity_answer = perplexity_wiki_search(author_name, life_dates, titles)
-            print("Author Wikis: ", perplexity_answer)
-            if check_perplexity_answer(perplexity_answer):
-                save_author_wikipedia_links(author_id, perplexity_answer, results_file)
-        else:
-            print("Author Wikis already on Gutenberg.")
-        record_author_as_done(author_id)
-
-
+    if check_perplexity_answer(perplexity_answer):
+        return perplexity_answer
+    return None

@@ -114,8 +114,18 @@ def get_book_metadata(book_id):
                             link = data.find('a', href=True)
                             if link and '/ebooks/author/' in link['href']:
                                 author_id = link['href'].split('/')[-1]
-                                name = link.text.strip()
-                                life_dates = data.text.replace(name, '').strip(' ()')
+                                full_name = link.text.strip()
+
+                                # Extract life dates from name (format: "Name, dates" or "Name (full), dates")
+                                life_dates = ''
+                                name = full_name
+
+                                # Look for date patterns like "1857-1920" or "-1912" or "1857-"
+                                date_match = re.search(r',\s*(\d{4}?-\d{4}?|\d{4}-|-\d{4})$', full_name)
+                                if date_match:
+                                    life_dates = date_match.group(1)
+                                    name = full_name[:date_match.start()].strip()
+
                                 result['authors'].append({
                                     'id': author_id,
                                     'name': name,

@@ -14,7 +14,13 @@ from utils import *
 from summaries import summarise_book, save_summary
 from readability import calculate_readability, save_readability
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis
-from wiki_for_authors import get_author_wikipedia_links
+from wiki_for_authors import (
+    get_author_metadata,
+    exclude_already_done_authors,
+    record_author_as_done,
+    get_author_wikipedia_link,
+    save_author_wikipedia_link
+)
 from categories import get_categories, save_categories
 
 STEP_DELAY = 1
@@ -93,11 +99,26 @@ for book_id in range(start_id + 1, end_id + 1):
 
     # Find Wikipedia links for authors
     if authors:
-        try:
-            get_author_wikipedia_links(authors, results_file)
-        except Exception as e:
-            print("Author wiki: Error")
-            record_error(f"{book_id}, Author wiki, {e}", errors_file)
+        authors = exclude_already_done_authors(authors)
+        for author in authors:
+            try:
+                author_id = author['id']
+                author_metadata = get_author_metadata(author_id)
+
+                if author_metadata and not author_metadata['has_wiki_link']:
+                    wiki_link = get_author_wikipedia_link(author, author_metadata)
+                    if wiki_link:
+                        save_author_wikipedia_link(author_id, wiki_link, results_file)
+                        print(f"Author wiki: {wiki_link}")
+                    else:
+                        print("Author wiki: Not found")
+                else:
+                    print("Author wiki: Already exists")
+
+                record_author_as_done(author_id)
+            except Exception as e:
+                record_error(f"{book_id}, Author wiki {author_id}, {e}", errors_file)
+                record_author_as_done(author_id)
     else:
         print("Author wiki: Skipped (no authors)")
     time.sleep(STEP_DELAY)
@@ -107,14 +128,8 @@ for book_id in range(start_id + 1, end_id + 1):
 
 
 
-# testing that individual functions work? (testing suited)
-# fetching logic into separate file?
-# competent recording of errors?
 
-# design of error recording?
-
-# look a bit into the authors -& wiki_for_authors.py
-# -- check that wiki functions still work ...
-
-# comments on top of files
-# basic clean up for each ...
+# simplifications?
+# Readme
+# done_authors.txt necessary
+# data getting --> to be done in pipeline anyway
