@@ -1,4 +1,4 @@
-# Finds Wikipedia links for authors using Perplexity.
+# Finds Wikipedia links for authors using Perplexity. Some books have more than one author (including translators etc.).
 # For each author who isn't already on Gutenberg, we use Perplexity to search based on author name, life dates, and their book titles.
 # Perplexity is a search engine that uses AI to search the web.
 # Results are validated to ensure they're actual Wikipedia pages before saving.
@@ -102,8 +102,6 @@ def perplexity_wiki_search(author_name, life_dates, titles):
 
 def get_author_metadata(author_id):
     """
-    Fetch author metadata in one request.
-    Returns dict with: book_titles, has_wiki_link
     """
     url = f"https://www.gutenberg.org/ebooks/author/{author_id}"
     headers = {
@@ -134,12 +132,8 @@ def get_author_metadata(author_id):
 def exclude_already_done_authors(authors):
     "exclude authors that have already been done (i.e. have an entry in done_authors.txt)"
     with open("done_authors.txt", "r") as f:
-        already_done = f.read().split("\n")
-    not_done = []
-    for author in authors:
-        if list(author.keys())[0] not in already_done:
-            not_done.append(author)
-    return not_done
+        already_done = set(f.read().split("\n"))
+    return [a for a in authors if a['id'] not in already_done]
 
 
 def check_perplexity_answer(answer):
@@ -186,25 +180,16 @@ def get_author_wikipedia_links(authors, results_file):
     Find Wikipedia links for authors.
     authors: list of author dicts from get_book_metadata()
     """
-    # Convert to old format for compatibility with exclude_already_done_authors
-    authors_old_format = []
+    authors = exclude_already_done_authors(authors)
+    if not authors:
+        print("Author Wikis already done for all authors.")
+        return
+
     for author in authors:
         author_id = author['id']
-        name = author['name']
+        author_name = author['name']
         life_dates = author['life_dates']
-        authors_old_format.append({author_id: [name, life_dates]})
 
-    authors_old_format = exclude_already_done_authors(authors_old_format)
-    if not authors_old_format:
-        print("Author Wikis already done for all authors.")
-
-    # Note - A book can have more than one author.
-    for author in authors_old_format:
-        author_id = list(author.keys())[0]
-        author_name = list(author.values())[0][0]
-        life_dates = list(author.values())[0][1]
-
-        # Get author metadata (titles and wiki status) in one call
         author_metadata = get_author_metadata(author_id)
         if not author_metadata:
             print(f"Author Wikis: Error fetching metadata for {author_id}")
