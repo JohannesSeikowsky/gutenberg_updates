@@ -1,12 +1,12 @@
 # Generates a summary of a book using ChatGPT.
-# For short books we feed in the entire book, for longer books we feed in roughly the first 35 pages.
+# For short books we feed in the entire book, for long books we feed in roughly the first 35 pages.
 # This is necessary due to cost and context-size limitations.
 # Read the prompting for a better understanding of how it works.
 
 # One thing to realise is that what we're looking to put on the Gutenberg page is not
-# actually a through, exhaustive summary of all the content of a book, but rathern to an impression of it
+# actually an exhaustive summary of the content of a book, but rathern an impression of it
 # so that users can decide whether try a book or not. Kind of like a trailer for a movie.
-# In that sense "summary" is not a very accurate term.
+# In that sense "summary" is not actually a very accurate term.
 
 from openai import OpenAI
 import tiktoken

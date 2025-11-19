@@ -37,7 +37,7 @@ for book_id in range(start_id + 1, end_id + 1):
     print(f"Book: {book_id}")
 
     # Fetch all relevant data for book from Gutenberg once
-    book_content = get_book_content_by_id(book_id)
+    book_content = get_book_content(book_id)
     title, language, authors, has_wiki_link = get_book_metadata(book_id)
     print(title, language, authors, has_wiki_link, sep="\n")
 
@@ -129,7 +129,9 @@ for book_id in range(start_id + 1, end_id + 1):
 
 
 
-# simplifications?
 # Readme
-# done_authors.txt necessary
+# done_authors.txt necessary?
+
+# important commments?
+# more simplification
 # data getting --> to be done in pipeline anyway

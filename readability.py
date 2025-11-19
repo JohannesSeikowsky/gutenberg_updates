@@ -1,4 +1,4 @@
-# Calculates the readability score of a book using the Flesch-Kincaid readability test.
+# Calculates readability scores of a book using the Flesch-Kincaid readability test.
 # The exact score is then used to assign the book to a readability grade.
 
 import textstat

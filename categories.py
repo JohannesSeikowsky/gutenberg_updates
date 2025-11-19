@@ -1,6 +1,6 @@
-# Assigns books to predefined categories using ChatGPT.
-# We have 72 categories in total, listed in categories.txt.
-# We're using a schema to force ChatGPT to pick only from our predefined list of categories and return a list of strings.
+# Assigns a book to one or more predefined categories using ChatGPT.
+# We have 72 predefined categories in total listed in categories.txt.
+# We're using a schema to force ChatGPT to pick only from our predefined list and return the result as a list of strings.
 
 from openai import OpenAI
 from utils import *

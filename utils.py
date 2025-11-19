@@ -7,46 +7,26 @@ load_dotenv()
 
 
 def get_latest_book_id():
-    """
-    Fetch and return only the latest book ID from Project Gutenberg
-    Returns:
-        str: The latest book ID, or None if unable to fetch
-    """
-    base_url = "https://www.gutenberg.org"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; GutenbergLatestBook/1.0; +https://github.com)'
-    }
-
+    """Fetch and return the latest book ID from Project Gutenberg (so we know when to stop processing new books)."""
     try:
-        # Fetch the homepage
         response = requests.get(
-            base_url,
-            headers=headers,
+            "https://www.gutenberg.org",
+            headers={'User-Agent': 'Mozilla/5.0 (compatible; GutenbergLatestBook/1.0; +https://github.com)'},
             timeout=10
         )
         response.raise_for_status()
-
-        # Parse the HTML
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Find the latest book section
-        latest_books = soup.find('div', class_='page_content').find_all('a')
-
-        # Look for the first ebook link
-        for link in latest_books:
-            href = link.get('href', '')
-            if '/ebooks/' in href:
-                # Extract book ID
-                book_id = re.search(r'/ebooks/(\d+)', href)
-                if book_id:
-                    return int(book_id.group(1))
+        for link in soup.find('div', class_='page_content').find_all('a'):
+            if match := re.search(r'/ebooks/(\d+)', link.get('href', '')):
+                return int(match.group(1))
         return None
-
     except requests.RequestException:
         return None
 
 
-def get_book_content_by_id(book_id):
+def get_book_content(book_id):
+    """Fetches the content of a book from Project Gutenberg and cuts the Gutenberg header and footer."""
     url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt"
     headers = {
         'User-Agent': 'Mozilla/5.0 (compatible; GutenbergContent/1.0; +https://github.com)'
@@ -146,7 +126,8 @@ def get_book_metadata(book_id):
     return result['title'], result['language'], result['authors'], result['has_wiki_link']
 
 
-def cut_beginning(text):    
+def cut_beginning(text):
+  """Cut the beginning of the book to remove the Gutenberg header."""
   start_marker = "*** START OF"
   lines = text.split('\n')
 
@@ -157,6 +138,7 @@ def cut_beginning(text):
 
 
 def cut_end(text):
+  """Cut the end of the book to remove the Gutenberg footer (legal stuff)."""
   end_marker = "*** END OF"
   lines = text.split('\n')
 

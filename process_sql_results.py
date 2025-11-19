@@ -1,3 +1,7 @@
+# Originally results were saved in sql-queries as requested by Greg. 
+# Eric asked to get the results in their original format instead (i.e. not within sql)
+# This script parses the results out of the sql and saves them in "processed_results/".
+
 import json
 import os
 
@@ -18,7 +22,6 @@ for line in lines:
     if "(This is an automatically generated" in line:
       summary = line.split("520,'")[1].split("',0);")[0]
       id = int(line.split("values (")[1].split(",520")[0])
-      # Save as JSONL
       with open("processed_results/summaries/summaries_10_25.jsonl", "a") as jsonl_file:
         jsonl_file.write(json.dumps({id: summary}) + "\n")
   except Exception as e:

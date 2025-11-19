@@ -1,7 +1,7 @@
 # Finds Wikipedia links for books 
 # We're using Serper (Google search API) to search for wikipedia links related to the book.
-# Then we use ChatGPT to find the wikipedia link(s) that actually is about the book (not the author or a file or whatnot)  
-# For non-English books, we searche for both English and native language Wikipedia pages.
+# Then we use ChatGPT to find the wikipedia link(s) that actually are about the book itself (not the author or a film or whatnot)  
+# For non-English books, we search for both the English and the native language Wikipedia pages.
 
 from utils import *
 import json
@@ -20,7 +20,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def check_english_wikipedia_page(book_title, content):
-    "checks if the wikipedia page is about the book in question."
+    "Checks if the wikipedia page is about the book in question."
     class Choice(BaseModel):
         correct_wikipedia_page: bool
 
