@@ -17,10 +17,9 @@ Errors are saved in the `errors/` directory in a file named after the current mo
 ## State & Data
 - `latest_id.txt` — Tracks the ID of the last processed book
 - `categories.txt` — Master list of the 72 Main categories and their ids
-- `done_authors.txt` — author_ids of those authors that already have a Wikipedia link on Gutenberg (to avoid duplication)
 
 ## Tests
-The code in `tests.py` runs the pipeline for a representative test case. Very minimalistic but still useful to run after code changes have been made to ensure all major functionalities still work.
+The code in `tests.py` runs the pipeline for a representative test case. Super minimalistic but still useful to run after changes to ensure the major functionalities still work.
 
 ## Setup
 Add API keys (OpenAI, Serper and Perplexity) to `.env`, then `pip install -r requirements.txt`.
@@ -29,7 +28,7 @@ Add API keys (OpenAI, Serper and Perplexity) to `.env`, then `pip install -r req
 `python main.py` processes books chronologically in the manner described taking the ID from latest_id.txt as the starting point (latest_id.txt gets incremented with every processed book).
 
 ## Code Quality
-The code has been written in my limited free time and without the expectation that it would ever be shared with anyone. It's thus largely unedited and unrefined. I've done some basic clean-up of some, but not all, parts of it.
+The code has been written in my limited free time and without the expectation that it would ever be shared with anyone. It's thus largely unedited and unrefined. I've done some basic clean-up of some files, but not all.
 
 ## ToDo
 - Integration with the continual publishing process of new books. Most important!!
@@ -37,4 +36,4 @@ The code has been written in my limited free time and without the expectation th
 - Maybe there's a better way than scraping to get the necessary data into the pipeline. 
 - I havent had time to thoroughly check whether the error recording logic does a solid job.
 - The two "wiki" scripts use different approaches for finding Wikipedia links. Maybe one approach is better than the other.
-- Once we have code that generates summaries based on a Wikipedia articles for those books that have one, there needs to be a branching in the code since those books then obviously won't need a summary generated with the current method.
+- Once we have code that generates summaries based on Wikipedia articles for those books that have them, there should be a branching logic since those books then obviously won't need a summary generated with the current method.

@@ -1,6 +1,6 @@
 # Hyper-minimalistic test. Run to see whether the core functionalities work as expected after changes.
 # The test case is "La Divina Commedia di Dante" because has wikipedia links for both the book and the author.
-# 
+
 
 from utils import get_book_content, get_book_metadata
 from summaries import summarise_book

@@ -139,8 +139,7 @@ Accept that first or middle names of the author may be abbreviated.
 
 def get_author_metadata(author_id):
     """Gets all book titles by the author (additional relevant info to feed into the Perplexity search)
-    and checks whether the author already has a wikipedia link (to avoid duplication).
-    """
+       and checks whether the author already has a wikipedia link (to avoid duplication). """
     url = f"https://www.gutenberg.org/ebooks/author/{author_id}"
     headers = {
         'User-Agent': 'Mozilla/5.0 (compatible; GutenbergAuthor/1.0; +https://github.com)'
