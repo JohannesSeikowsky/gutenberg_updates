@@ -4,12 +4,12 @@ The system runs once a month to process all books that have been newly published
 ## Architecture
 `main.py` is the main script that orchestrates this five-step pipeline for each book. It's deliberately simple and straightforward. There's a separate file for each of the five steps: `summaries.py`, `categories.py`, `readability.py`, `wiki_for_books.py`, `wiki_for_authors.py`
 
-The data that's necessary to run this pipeline is obtained by scraping the Project Gutenberg once for each book (lines 34-35 main.py). I suspect a better integration with the publishing process may be possible.
+The data that's necessary to run this pipeline is obtained by scraping the Project Gutenberg once for each book (see main.py). I suspect a better integration with the publishing process may be possible.
 
 To make the code easier to understand I added an explanatory comment at the beginning of each of the most important files. I recommend reading those comments before trying to understand the code.
 
 ## Results
-Results are saved in the `results/` directory in a file named after the current month. They are saved in sql-queries as requested by Greg. The idea was that these sql quries could then be directly run to put the results into the database and thereby put them online. Eric asked to get the results in their original format instead (i.e. not within sql), so I added `process_sql_results.py` which parses said results out of the sql and saves them in "processed_results/".
+Results are saved in the `results/` directory in a file named after the current month. They are saved in sql-queries as requested by Greg. The idea was that these sql quries could then be directly run to put the results into the database and thereby online. Eric asked to get the results in their original format instead (i.e. not within sql), so I added `process_sql_results.py` which parses said results out of the sql and saves them in "processed_results/".
 
 ## Errors
 Errors are saved in the `errors/` directory in a file named after the current month.
@@ -35,4 +35,5 @@ Add API keys (OpenAI, Serper and Perplexity) to `.env`, then `pip install -r req
 - For those books that have a sufficiently thorough Wikipedia article, the summary can be based on that articile instead of being generated in the current way. This is a work in progress.
 - tests.py could very easily be extended to run for more than just 1 test case
 - `process_sql_results.py` can be made redudant by adjusting the saving functions
+
 **Note: a lot depends on the integration of this pipeline into the "normal" publishing process, which is why that's No1 on this list.**
