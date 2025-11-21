@@ -5,15 +5,8 @@
 import json
 import os
 
-# Create directory if it doesn't exist
-os.makedirs("processed_results/summaries", exist_ok=True)
-os.makedirs("processed_results/readability", exist_ok=True)
-os.makedirs("processed_results/categories", exist_ok=True)
-os.makedirs("processed_results/author_wikipedia", exist_ok=True)
-os.makedirs("processed_results/book_wikipedia", exist_ok=True)
-
-
-with open("results/update_10_25.txt", "r") as f:
+target = "results/update_10_25.txt"
+with open(target, "r") as f:
   lines = f.readlines()
 
 # summaries

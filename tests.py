@@ -4,14 +4,14 @@
 from utils import get_book_content, get_book_metadata
 from summaries import summarise_book
 from categories import get_categories
-from readability import calculate_readability
+from readability import calculate_readability_score
 from wiki_for_books import get_book_wikipedia_links
 from wiki_for_authors import (
     get_author_metadata,
     get_author_wikipedia_link
 )
 
-test_case = 1000 # 
+test_case = 1000
 
 # Interactive function selection
 print("Select functions to run (e.g., '1,2,4' or '6' for all):")
@@ -35,12 +35,24 @@ else:
 
 if '2' in selected or run_all:
     if not summary:
-        summary = summarise_book(book_content, title)
+        summary = """
+        "La Divina Commedia di Dante: Complete" by Dante Alighieri is an epic poem written in the 14th century.
+        The work explores themes of morality, spirituality, and the afterlife as it follows the journey of the
+        protagonist, Dante, through the realms of Hell, Purgatory, and Heaven, guided initially by the Roman poet
+        Virgil. At the start of the narrative, Dante finds himself lost in a dark forest, representing sin and
+        confusion, realizing he has strayed from the righteous path. Struggling with despair, he encounters various
+        allegorical beasts that symbolize different sins and obstacles in life. After invoking the muses for
+        assistance, he meets Virgil, who offers to guide him through the depths of Hell and beyond. This marks the
+        beginning of a transformative journey as they embark on a quest to understand the nature of sin, redemption,
+        and divine justice. This intricate journey sets the tone for the rich allegorical explorations and profound
+        reflections on the human condition that unfold throughout the text. (This is an automatically generated
+        summary.) Show Less
+        """
     categories = get_categories(test_case, summary)
     print(f"Categories: {categories}")
 
 if '3' in selected or run_all:
-    readability = calculate_readability(book_content)
+    readability = calculate_readability_score(book_content)
     print(f"Readability: {readability}")
 
 if '4' in selected or run_all:

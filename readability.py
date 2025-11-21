@@ -3,19 +3,17 @@
 
 import textstat
 
-def calculate_readability(book_content):
-  reading_score = textstat.flesch_reading_ease(book_content)
-  return reading_score
+def calculate_readability_score(book_content):
+  """Calculate Flesch reading ease score for book content."""
+  return textstat.flesch_reading_ease(book_content)
 
 
-def generate_sql(book_id, score):
-  """ generate a SQL query for a given book book_id and reading ease score. """
-  score = float(score)
-
-  ranges = [
+def get_readability_grade(score):
+  """Get grade level and description for a readability score."""
+  score_ranges = [
       (90, 100, "5th grade", "Very easy to read."),
       (80, 90, "6th grade", "Easy to read."),
-      (70, 80, "7th grade", "Fairly easy to read."), 
+      (70, 80, "7th grade", "Fairly easy to read."),
       (60, 70, "8th & 9th grade", "Neither easy nor difficult to read."),
       (50, 60, "10th to 12th grade", "Somewhat difficult to read."),
       (30, 50, "College-level", "Difficult to read."),
@@ -23,12 +21,16 @@ def generate_sql(book_id, score):
       (0, 10, "Professional level", "Extremely difficult to read.")
   ]
 
-  for min_score, max_score, grade, description in ranges:
-      if min_score <= score <= max_score:
-          return f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},908,'Reading ease score: {score:.1f} ({grade}). {description}',0);"
+  for min_val, max_val, grade, description in score_ranges:
+      if min_val <= score <= max_val:
+          return grade, description
+  return None, None
 
 
-def save_readability(book_id, readability_score, file):
-  sql = generate_sql(book_id, readability_score)
-  with open(file, "a") as f:
+def save_readability_sql(book_id, score, output_file):
+  """Generate and append readability SQL statement to output file."""
+  grade, description = get_readability_grade(score)
+  sql = f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},908,'Reading ease score: {score:.1f} ({grade}). {description}',0);"
+  with open(output_file, "a") as f:
     f.write(f"{sql}\n")
+

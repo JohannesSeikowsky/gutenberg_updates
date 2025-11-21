@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 from utils import *
 from summaries import summarise_book, save_summary
-from readability import calculate_readability, save_readability
+from readability import calculate_readability_score, save_readability_sql
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis
 from wiki_for_authors import (
     get_author_metadata,
@@ -69,9 +69,9 @@ for book_id in range(start_id + 1, end_id + 1):
     # Calculate readability score
     if book_content:
         try:
-            readability = calculate_readability(book_content)
+            readability = calculate_readability_score(book_content)
             print(f"Readability: {readability}")
-            save_readability(book_id, readability, results_file)
+            save_readability_sql(book_id, readability, results_file)
         except Exception as e:
             print("Readability: Error")
             record_error(f"{book_id}, Readability, {e}", errors_file)

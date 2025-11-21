@@ -33,7 +33,11 @@ replit.nix
 
 # Local configuration
 .local/
+.claude/
 
 # Lock files (keeping requirements.txt as the source of truth)
 uv.lock
 CLAUDE.md
+
+#Todo
+todo.txt
