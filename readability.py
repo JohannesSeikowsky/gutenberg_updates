@@ -33,4 +33,3 @@ def save_readability_sql(book_id, score, output_file):
   sql = f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},908,'Reading ease score: {score:.1f} ({grade}). {description}',0);"
   with open(output_file, "a") as f:
     f.write(f"{sql}\n")
-

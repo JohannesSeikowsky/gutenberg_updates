@@ -11,7 +11,7 @@ from wiki_for_authors import (
     get_author_wikipedia_link
 )
 
-test_case = 1000
+test_case = 8438
 
 # Interactive function selection
 print("Select functions to run (e.g., '1,2,4' or '6' for all):")

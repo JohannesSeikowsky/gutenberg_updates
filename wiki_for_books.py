@@ -3,7 +3,6 @@
 # Then we use ChatGPT to filter for those wikipedia link(s) that are actually about the book (not about the author or a film or whatnot)
 # For non-English books, we search for both the English and the native language Wikipedia pages.
 
-from utils import *
 import wikipedia
 import urllib.parse
 from pydantic import BaseModel

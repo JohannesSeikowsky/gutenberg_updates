@@ -27,13 +27,10 @@ Add API keys (OpenAI, Serper and Perplexity) to `.env`, then `pip install -r req
 ## Run
 `python main.py` processes books chronologically in the manner described taking the ID from latest_id.txt as the starting point (latest_id.txt gets incremented with every processed book).
 
-## Code Quality
-The code has been written in my limited free time and without the expectation that it would ever be shared with anyone. It's thus largely unedited and unrefined. I've done some basic clean-up of some files, but not all.
-
 ## ToDo
-- Integration with the continual publishing process of new books. Most important!!
-- Some parts of the code are unedited (as already mentioned).
+- Integration with the continual publishing process of new books. This is the most important thing by far!!
 - Maybe there's a better way than scraping to get the necessary data into the pipeline. 
 - I havent had time to thoroughly check whether the error recording logic does a solid job.
 - The two "wiki" scripts use different approaches for finding Wikipedia links. Maybe one approach is better than the other.
 - Once we have code that generates summaries based on Wikipedia articles for those books that have them, there should be a branching logic since those books then obviously won't need a summary generated with the current method.
+- tests.py could easily be extended to run for more than just 1 test case

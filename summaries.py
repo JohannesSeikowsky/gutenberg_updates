@@ -5,14 +5,13 @@
 
 # One thing to realise is that what we're looking to put on the Gutenberg page is not
 # actually an exhaustive summary of all the content of a book, but rathern an impression of it
-# so that users can decide whether try a book or not. Kind of like a trailer for a movie.
+# so that users can decide whether try a book or not. Kind of like a trailer to a movie.
 # In that sense "summary" is not actually a very accurate term.
 
 from openai import OpenAI
 import tiktoken
 import os
 from dotenv import load_dotenv
-from utils import *
 
 load_dotenv()
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))

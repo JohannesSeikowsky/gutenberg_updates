@@ -23,7 +23,7 @@ from categories import get_categories, save_categories
 
 STEP_DELAY = 1
 
-start_id = get_latest_completed_id()
+start_id = load_last_processed_id()
 end_id = get_latest_book_id()
 print(f"Processing books {start_id + 1} to {end_id}")
 
@@ -47,7 +47,7 @@ for book_id in range(start_id + 1, end_id + 1):
             save_summary(book_id, summary, results_file)
         except Exception as e:
             print("Summary: Error")
-            record_error(f"{book_id}, Summary, {e}", errors_file)
+            log_error(f"{book_id}, Summary, {e}", errors_file)
     else:
         print("Summary: Skipped (missing data)")
         summary = None
@@ -61,7 +61,7 @@ for book_id in range(start_id + 1, end_id + 1):
             save_categories(book_id, categories, results_file)
         except Exception as e:
             print("Categories: Error")
-            record_error(f"{book_id}, Categories, {e}", errors_file)
+            log_error(f"{book_id}, Categories, {e}", errors_file)
     else:
         print("Categories: Skipped (missing summary)")
     time.sleep(STEP_DELAY)
@@ -74,7 +74,7 @@ for book_id in range(start_id + 1, end_id + 1):
             save_readability_sql(book_id, readability, results_file)
         except Exception as e:
             print("Readability: Error")
-            record_error(f"{book_id}, Readability, {e}", errors_file)
+            log_error(f"{book_id}, Readability, {e}", errors_file)
     else:
         print("Readability: Skipped (missing data)")
     time.sleep(STEP_DELAY)
@@ -90,7 +90,7 @@ for book_id in range(start_id + 1, end_id + 1):
                 print("Book wiki: Already exists")
         except Exception as e:
             print("Book wiki: Error")
-            record_error(f"{book_id}, Book wiki, {e}", errors_file)
+            log_error(f"{book_id}, Book wiki, {e}", errors_file)
     else:
         print("Book wiki: Skipped (missing data)")
     time.sleep(STEP_DELAY)
@@ -112,10 +112,10 @@ for book_id in range(start_id + 1, end_id + 1):
                 else:
                     print("Author already has a Wikipedia link")
             except Exception as e:
-                record_error(f"{book_id}, Author wiki {author_id}, {e}", errors_file)
+                log_error(f"{book_id}, Author wiki {author_id}, {e}", errors_file)
     else:
         print("Author wiki: Skipped (no authors)")
     time.sleep(STEP_DELAY)
 
-    record_latest_completed_id(book_id)
+    save_last_processed_id(book_id)
     print("---------------------")
