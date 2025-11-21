@@ -8,7 +8,6 @@ from readability import calculate_readability
 from wiki_for_books import get_book_wikipedia_links
 from wiki_for_authors import (
     get_author_metadata,
-    exclude_already_done_authors,
     get_author_wikipedia_link
 )
 
