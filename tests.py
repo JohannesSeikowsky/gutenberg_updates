@@ -17,19 +17,19 @@ book_content = get_book_content(test_case)
 title, language, authors, has_wiki_link = get_book_metadata(test_case)
 print(title, language, authors, has_wiki_link, sep="\n")
 
-summary = summarise_book(book_content, title)
-print(f"Summary: {summary}")
+# summary = summarise_book(book_content, title)
+# print(f"Summary: {summary}")
 
-categories = get_categories(test_case, summary)
-print(f"Categories: {categories}")
+# categories = get_categories(test_case, summary)
+# print(f"Categories: {categories}")
 
-readability = calculate_readability(book_content)
-print(f"Readability: {readability}")
+# readability = calculate_readability(book_content)
+# print(f"Readability: {readability}")
 
 wiki_links = get_book_wikipedia_links(title, language)
 print(f"Book Wikipedia: {wiki_links}")
 
-for author in authors:
-    author_metadata = get_author_metadata( author['id']) # finds other books by the author
-    wiki_link = get_author_wikipedia_link(author, author_metadata)
-    print(f"Author Wikipedia: {wiki_link}")
+# for author in authors:
+#     author_metadata = get_author_metadata( author['id']) # finds other books by the author
+#     wiki_link = get_author_wikipedia_link(author, author_metadata)
+#     print(f"Author Wikipedia: {wiki_link}")
