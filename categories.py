@@ -86,7 +86,7 @@ def get_categories(book_id, summary):
     return json.loads(response.choices[0].message.content)["categories"]
 
 
-def save_categories(book_id, categories, output_file):
+def save_categories_sql(book_id, categories, output_file):
     """Writes SQL INSERT statements for book-category mappings to output file."""
     category_ids = [name_to_id[name] for name in categories]
 

@@ -151,7 +151,7 @@ def is_valid_wikipedia_page(url):
         return False
 
 
-def save_author_wikipedia_link(author_id, wikipedia_url, results_file):
+def save_author_wiki_sql(author_id, wikipedia_url, results_file):
     """Append SQL statement to results file."""
     wikipedia_subdomain = extract_wikipedia_subdomain(wikipedia_url)
     insert_statement = f"insert into author_urls (fk_authors, description, url) values ({author_id},'{wikipedia_subdomain}','{wikipedia_url}');"

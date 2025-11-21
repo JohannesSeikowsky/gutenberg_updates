@@ -107,7 +107,7 @@ def get_book_wikipedia_links(book_title, book_language):
     return matched_urls
 
 
-def save_book_wikis(book_id, wiki_urls, output_file):
+def save_book_wikis_sql(book_id, wiki_urls, output_file):
     """Appends SQL INSERT for Wikipedia URLs to results file."""
     if not wiki_urls:
         return

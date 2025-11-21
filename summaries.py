@@ -130,7 +130,7 @@ def summarise_book(book_content, title):
     return format_summary(summary)
 
 
-def save_summary(book_id, summary, output_file):
+def save_summary_sql(book_id, summary, output_file):
     """Append SQL INSERT statement for book summary to output file."""
     note = " (This is an automatically generated summary.)"
     sql = f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},520,'{summary}{note}',0);"

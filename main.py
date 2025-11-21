@@ -11,15 +11,15 @@
 import time
 from datetime import datetime
 from utils import *
-from summaries import summarise_book, save_summary
+from summaries import summarise_book, save_summary_sql
 from readability import calculate_readability_score, save_readability_sql
-from wiki_for_books import get_book_wikipedia_links, save_book_wikis
+from wiki_for_books import get_book_wikipedia_links, save_book_wikis_sql
 from wiki_for_authors import (
     get_author_metadata,
     get_author_wikipedia_link,
-    save_author_wikipedia_link
+    save_author_wiki_sql
 )
-from categories import get_categories, save_categories
+from categories import get_categories, save_categories_sql
 
 STEP_DELAY = 1
 
@@ -44,7 +44,7 @@ for book_id in range(start_id + 1, end_id + 1):
         try:
             summary = summarise_book(book_content, title)
             print(f"Summary: {summary}")
-            save_summary(book_id, summary, results_file)
+            save_summary_sql(book_id, summary, results_file)
         except Exception as e:
             print("Summary: Error")
             log_error(f"{book_id}, Summary, {e}", errors_file)
@@ -58,7 +58,7 @@ for book_id in range(start_id + 1, end_id + 1):
         try:
             categories = get_categories(book_id, summary)
             print(f"Categories: {categories}")
-            save_categories(book_id, categories, results_file)
+            save_categories_sql(book_id, categories, results_file)
         except Exception as e:
             print("Categories: Error")
             log_error(f"{book_id}, Categories, {e}", errors_file)
@@ -85,7 +85,7 @@ for book_id in range(start_id + 1, end_id + 1):
             if not has_wiki_link:
                 wiki_links = get_book_wikipedia_links(title, language)
                 print(f"Book wiki: {wiki_links}")
-                save_book_wikis(book_id, wiki_links, results_file)
+                save_book_wikis_sql(book_id, wiki_links, results_file)
             else:
                 print("Book wiki: Already exists")
         except Exception as e:
@@ -105,7 +105,7 @@ for book_id in range(start_id + 1, end_id + 1):
                 if author_metadata and not author_metadata['has_wiki_link']:
                     wiki_link = get_author_wikipedia_link(author, author_metadata)
                     if wiki_link:
-                        save_author_wikipedia_link(author_id, wiki_link, results_file)
+                        save_author_wiki_sql(author_id, wiki_link, results_file)
                         print(f"Author wiki: {wiki_link}")
                     else:
                         print("Author wiki: Not found")
