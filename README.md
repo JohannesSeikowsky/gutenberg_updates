@@ -36,4 +36,4 @@ Add API keys (OpenAI, Serper and Perplexity) to `.env`, then `pip install -r req
 - tests.py could very easily be extended to run for more than just 1 test case
 - `process_sql_results.py` can be made redudant by adjusting the saving functions
 
-**Note: a lot depends on the integration of this pipeline into the "normal" publishing process, which is why that's No1 on this list.**
+**Note: a LOT depends on the integration of this pipeline into the "normal" publishing process, which is why that's No1 on this list.**
