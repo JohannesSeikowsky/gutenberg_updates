@@ -9,7 +9,7 @@ The data that's necessary to run this pipeline is obtained by scraping the Proje
 To make the code easier to understand I added an explanatory comment at the beginning of each of the most important files. I recommend reading those comments before trying to understand the code.
 
 ## Results
-Results are saved in the `results/` directory in a file named after the current month. They are saved in sql-queries as requested by Greg. The idea was that these sql quries could then be directly run to put the results into the database and thereby online. Eric asked to get the results in their original format instead (i.e. not within sql), so I added `process_sql_results.py` which parses said results out of the sql and saves them in "processed_results/".
+Results are saved in the `results/` directory in a file named after the current month. They are saved in sql-queries as requested by Greg. The idea was that these sql quries could then be directly run to put the results into the database and thereby online on gutenberg.org. Eric recently asked to get the results in their original format instead (i.e. not within sql), so I added `process_sql_results.py` which parses said results out of the sql and saves them in "processed_results/".
 
 ## Errors
 Errors are saved in the `errors/` directory in a file named after the current month.
