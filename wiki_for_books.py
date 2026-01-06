@@ -61,7 +61,7 @@ Wikipedia excerpt:
 Return correct_wikipedia_page: true if this is the book's Wikipedia article, false otherwise."""
 
     completion = client.beta.chat.completions.parse(
-        model="gpt-5",
+        model="gpt-5.2",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}

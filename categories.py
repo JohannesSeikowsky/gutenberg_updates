@@ -70,7 +70,7 @@ def get_categories(book_id, summary):
     system_prompt = system_prompt_template.format(category_names_text=category_names_text)
 
     response = openai_client.beta.chat.completions.parse(
-        model="gpt-5",
+        model="gpt-5.2",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_instruction},

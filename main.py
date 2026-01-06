@@ -11,7 +11,12 @@
 import time
 from datetime import datetime
 from utils import *
-from summaries import summarise_book, save_summary_sql
+from summaries import (
+    summarise_book,
+    summarise_book_from_wikipedia,
+    is_valid_wikipedia_link_for_summary,
+    save_summary_sql
+)
 from readability import calculate_readability_score, save_readability_sql
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis_sql
 from wiki_for_authors import (
@@ -39,15 +44,42 @@ for book_id in range(start_id + 1, end_id + 1):
     title, language, authors, has_wiki_link = get_book_metadata(book_id)
     print(title, language, authors, has_wiki_link, sep="\n")
 
+    # Find Wikipedia links for book
+    if title and language:
+        try:
+            wiki_links = get_book_wikipedia_links(title, language)
+            print(f"Book wiki: {wiki_links}")
+            save_book_wikis_sql(book_id, wiki_links, results_file)
+            wiki_links_found = bool(wiki_links)
+        except Exception as e:
+            print("Book wiki: Error")
+            log_error(f"{book_id}, Book wiki, {e}", errors_file)
+            wiki_links = []
+            wiki_links_found = False
+    else:
+        print("Book wiki: Skipped (missing data)")
+        wiki_links = []
+        wiki_links_found = False
+    time.sleep(STEP_DELAY)
+
     # Generate summary
     if book_content and title:
         try:
-            summary = summarise_book(book_content, title)
-            print(f"Summary: {summary}")
+            # Check if Wikipedia link is valid for summary generation
+            if wiki_links_found and is_valid_wikipedia_link_for_summary(wiki_links):
+                # New approach: summary from Wikipedia
+                summary = summarise_book_from_wikipedia(wiki_links, title)
+                print(f"Summary: Generated from Wikipedia")
+            else:
+                # Existing approach: summary from book content
+                summary = summarise_book(book_content, title)
+                print(f"Summary: Generated from book content")
+
             save_summary_sql(book_id, summary, results_file)
         except Exception as e:
             print("Summary: Error")
             log_error(f"{book_id}, Summary, {e}", errors_file)
+            summary = None
     else:
         print("Summary: Skipped (missing data)")
         summary = None
@@ -77,22 +109,6 @@ for book_id in range(start_id + 1, end_id + 1):
             log_error(f"{book_id}, Readability, {e}", errors_file)
     else:
         print("Readability: Skipped (missing data)")
-    time.sleep(STEP_DELAY)
-
-    # Find Wikipedia links for book
-    if title and language:
-        try:
-            if not has_wiki_link:
-                wiki_links = get_book_wikipedia_links(title, language)
-                print(f"Book wiki: {wiki_links}")
-                save_book_wikis_sql(book_id, wiki_links, results_file)
-            else:
-                print("Book wiki: Already exists")
-        except Exception as e:
-            print("Book wiki: Error")
-            log_error(f"{book_id}, Book wiki, {e}", errors_file)
-    else:
-        print("Book wiki: Skipped (missing data)")
     time.sleep(STEP_DELAY)
 
     # Find Wikipedia links for authors
