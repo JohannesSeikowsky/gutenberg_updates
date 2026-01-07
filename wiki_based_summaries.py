@@ -51,6 +51,34 @@ def truncate_to_words(text, word_limit):
     return ' '.join(words[:word_limit])
 
 
+def select_wikipedia_article(wiki_links, min_word_count=280):
+    """Select the longest Wikipedia article from wiki_links, excluding articles shorter than min_word_count."""
+    if not wiki_links:
+        return None
+
+    # Step 1: Download all articles and exclude those shorter than min_word_count
+    articles_meeting_minimum = []
+
+    for url in wiki_links:
+        try:
+            article_text = download_wikipedia_article(url)
+            word_count = len(article_text.split())
+
+            # Exclude articles shorter than minimum
+            if word_count >= min_word_count:
+                articles_meeting_minimum.append((article_text, word_count))
+        except Exception:
+            # Skip articles that fail to download, continue with others
+            continue
+
+    if not articles_meeting_minimum:
+        return None
+
+    # Step 2: Pick the longest article from remaining candidates
+    longest_article = max(articles_meeting_minimum, key=lambda x: x[1])
+    return longest_article[0]
+
+
 def generate_wiki_based_summary(article_text, gutenberg_title):
     """Generate a summary for a single article using Claude API."""
     truncated = truncate_to_words(article_text, 1200)

@@ -16,7 +16,7 @@ from summaries import (
     save_summary_sql,
     format_summary
 )
-from wiki_based_summaries import download_wikipedia_article, generate_wiki_based_summary
+from wiki_based_summaries import download_wikipedia_article, generate_wiki_based_summary, select_wikipedia_article
 from readability import calculate_readability_score, save_readability_sql
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis_sql
 from validate_book_wiki import validate_wiki_links
@@ -73,15 +73,22 @@ for book_id in range(start_id + 1, end_id + 1):
         try:
             if wiki_links_found:
                 try:
-                    # New approach: Wiki-based summary
-                    article_text = download_wikipedia_article(wiki_links[0])
-                    summary = generate_wiki_based_summary(article_text, title)
-                    summary = format_summary(summary)
-                    print(f"Summary: Generated from Wikipedia")
-                except Exception:
-                    # Existing approach: summary from book content
+                    # New approach: Wiki-based summary with smart article selection
+                    article_text = select_wikipedia_article(wiki_links)
+
+                    if article_text is None:
+                        # No valid Wikipedia article found (all too short or failed to download)
+                        summary = summarise_book(book_content, title)
+                        print(f"Summary: Generated from book content (no valid Wikipedia articles >= 280 words)")
+                    else:
+                        # Generate summary from selected Wikipedia article
+                        summary = generate_wiki_based_summary(article_text, title)
+                        summary = format_summary(summary)
+                        print(f"Summary: Generated from Wikipedia")
+                except Exception as e:
+                    # Fallback to book content if selection process fails entirely
                     summary = summarise_book(book_content, title)
-                    print(f"Summary: Generated from book content (Wikipedia failed)")
+                    print(f"Summary: Generated from book content (Wikipedia failed: {e})")
             else:
                 # Existing approach: summary from book content
                 summary = summarise_book(book_content, title)
