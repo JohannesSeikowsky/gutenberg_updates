@@ -1,7 +1,7 @@
 # Main Script
 # Goes over all new book releases on Gutenberg since the last update was run and for each generates:
-# - Summary
 # - Wikipedia links for the book
+# - Summary - based either on the wikipedia article or the book itself.
 # - Readability score
 # - Categories
 # - Wikipedia links for the authors
@@ -19,6 +19,7 @@ from summaries import (
 )
 from readability import calculate_readability_score, save_readability_sql
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis_sql
+from validate_book_wiki import validate_wiki_links
 from wiki_for_authors import (
     get_author_metadata,
     get_author_wikipedia_link,
@@ -48,7 +49,13 @@ for book_id in range(start_id + 1, end_id + 1):
     if title and language:
         try:
             wiki_links = get_book_wikipedia_links(title, language)
+
+            # Extra Validation of Wikipedia links using Claude
+            # Why? Because basing summaries on incorrect wikipedia articles is really not good. Thus this extra precaution.
+            authors_str = ", ".join([a['name'] for a in authors]) # note - it's important that it's clear in this string who the main author is versus who the editors, translators are etc. Else Claude may get confused when doing the validating.
+            wiki_links = validate_wiki_links(wiki_links, title, authors_str)
             print(f"Book wiki: {wiki_links}")
+
             save_book_wikis_sql(book_id, wiki_links, results_file)
             wiki_links_found = bool(wiki_links)
         except Exception as e:

@@ -6,6 +6,7 @@ from summaries import summarise_book
 from categories import get_categories
 from readability import calculate_readability_score
 from wiki_for_books import get_book_wikipedia_links
+from validate_book_wiki import validate_wiki_link
 from wiki_for_authors import (
     get_author_metadata,
     get_author_wikipedia_link

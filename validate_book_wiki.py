@@ -81,3 +81,12 @@ REASONING: [one very short sentence]"""
 
     except Exception:
         return False
+
+
+def validate_wiki_links(wiki_links: list[str], title: str, authors_str: str) -> list[str]:
+    """Filter Wikipedia links to only those that match the book."""
+    validated_links = []
+    for url in wiki_links:
+        if validate_wiki_link(url, title, authors_str):
+            validated_links.append(url)
+    return validated_links
