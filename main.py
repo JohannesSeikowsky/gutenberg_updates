@@ -13,10 +13,10 @@ from datetime import datetime
 from utils import *
 from summaries import (
     summarise_book,
-    summarise_book_from_wikipedia,
-    is_valid_wikipedia_link_for_summary,
-    save_summary_sql
+    save_summary_sql,
+    format_summary
 )
+from wiki_based_summaries import download_wikipedia_article, generate_wiki_based_summary
 from readability import calculate_readability_score, save_readability_sql
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis_sql
 from validate_book_wiki import validate_wiki_links
@@ -50,9 +50,8 @@ for book_id in range(start_id + 1, end_id + 1):
         try:
             wiki_links = get_book_wikipedia_links(title, language)
 
-            # Extra Validation of Wikipedia links using Claude
-            # Why? Because basing summaries on incorrect wikipedia articles is really not good. Thus this extra precaution.
-            authors_str = ", ".join([a['name'] for a in authors]) # note - it's important that it's clear in this string who the main author is versus who the editors, translators are etc. Else Claude may get confused when doing the validating.
+            # Extra Validation of Wikipedia links because basing summaries on incorrect wikipedia articles is really not good.
+            authors_str = ", ".join([a['name'] for a in authors]) # note - it's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude may get confused when doing the validating.
             wiki_links = validate_wiki_links(wiki_links, title, authors_str)
             print(f"Book wiki: {wiki_links}")
 
@@ -72,11 +71,17 @@ for book_id in range(start_id + 1, end_id + 1):
     # Generate summary
     if book_content and title:
         try:
-            # Check if Wikipedia link is valid for summary generation
-            if wiki_links_found and is_valid_wikipedia_link_for_summary(wiki_links):
-                # New approach: summary from Wikipedia
-                summary = summarise_book_from_wikipedia(wiki_links, title)
-                print(f"Summary: Generated from Wikipedia")
+            if wiki_links_found:
+                try:
+                    # New approach: Wiki-based summary
+                    article_text = download_wikipedia_article(wiki_links[0])
+                    summary = generate_wiki_based_summary(article_text, title)
+                    summary = format_summary(summary)
+                    print(f"Summary: Generated from Wikipedia")
+                except Exception:
+                    # Existing approach: summary from book content
+                    summary = summarise_book(book_content, title)
+                    print(f"Summary: Generated from book content (Wikipedia failed)")
             else:
                 # Existing approach: summary from book content
                 summary = summarise_book(book_content, title)

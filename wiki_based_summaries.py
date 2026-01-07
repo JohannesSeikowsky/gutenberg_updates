@@ -1,0 +1,113 @@
+"""Generate a single Wikipedia article summary using Claude API."""
+
+import anthropic
+import os
+import re
+import requests
+from urllib.parse import unquote
+from dotenv import load_dotenv
+
+load_dotenv()
+anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+SYSTEM_PROMPT = "You are skilled at writing compelling, teaser-style introductions for literary and artistic works that intrigue readers without revealing everything."
+
+USER_PROMPT_TEMPLATE = """The official title of this work on Project Gutenberg is: "{gutenberg_title}"
+
+Please use this as the authoritative title in your introduction, even if the Wikipedia article uses a different title (this may occur due to language differences or variations in naming).
+
+I'm going to give you the first 1200 words of the Wikipedia article of this work.
+Write an introduction-text for it that works like a movie trailer — giving a sense of what the work is about without revealing too much i.e. avoid spoilers. Write between 80-90 words. Do not exceed 90 words.
+
+If possible, the first sentence should follow this pattern: "(title)" by (author/composer) is a (type of work) written/published/composed in (time period).
+Note: The time period should be as specific as possible. If you have a specific year use that. If you have a decade or century, use that. If you don't have relevant information, please omit it.
+Base your word choice of using "written", "published", or "composed" on the content of the Wikipedia article.
+
+Examples:
+- "To Kill a Mockingbird" by Harper Lee is a novel written in 1960.
+- "Symphony No. 9" by Ludwig van Beethoven is a symphony composed in 1824.
+- "Letters to a Young Poet" by Rainer Maria Rilke is a collection of letters written between 1902-1908.
+
+Keep your writing very simple and straightforward. Avoid long sentences and unnecessarily complex language. Be clear and direct.
+
+Make sure to base EVERYTHING on the content of the Wikipedia article! Do NOT add any information that is not presented in the Wikipedia article.
+
+Always write in English, even if the Wikipedia article is in a different language.
+
+On occasion it is possible that the Wikipedia article does not have enough relevant information for you to write a reasonable introduction-text.
+i.e. it doesn't allow you to write a summary that conveys what the work is principally about.
+If that is so, please return "insufficient information"
+
+<WIKIPEDIA ARTICLE>
+{article_text}
+</WIKIPEDIA ARTICLE>"""
+
+
+def truncate_to_words(text, word_limit):
+    """Truncate text to specified number of words."""
+    words = text.split()
+    if len(words) <= word_limit:
+        return text
+    return ' '.join(words[:word_limit])
+
+
+def generate_wiki_based_summary(article_text, gutenberg_title):
+    """Generate a summary for a single article using Claude API."""
+    truncated = truncate_to_words(article_text, 1200)
+    prompt = USER_PROMPT_TEMPLATE.format(gutenberg_title=gutenberg_title, article_text=truncated)
+
+    message = anthropic_client.messages.create(
+        model="claude-sonnet-4-5-20250929",
+        max_tokens=400,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return message.content[0].text
+
+
+def download_wikipedia_article(url):
+    """Download Wikipedia article content from URL."""
+    # Extract language code from URL
+    lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', url)
+    if not lang_match:
+        raise ValueError(f"Could not extract language code from URL: {url}")
+    lang = lang_match.group(1)
+
+    # Extract page title from URL
+    title_match = re.search(r'/wiki/(.+)$', url.strip())
+    if not title_match:
+        raise ValueError(f"Could not extract page title from URL: {url}")
+    page_title = unquote(title_match.group(1))
+
+    # Call Wikipedia API
+    api_url = f"https://{lang}.wikipedia.org/w/api.php"
+    params = {
+        'action': 'query',
+        'format': 'json',
+        'prop': 'extracts',
+        'explaintext': True,
+        'redirects': 1,
+        'titles': page_title
+    }
+    headers = {'User-Agent': 'WikiBookScraper/1.0 (Educational project)'}
+
+    response = requests.get(api_url, params=params, headers=headers, timeout=30)
+    response.raise_for_status()
+
+    data = response.json()
+    pages = data.get('query', {}).get('pages', {})
+
+    if not pages:
+        raise ValueError("Empty API response")
+
+    page = next(iter(pages.values()))
+
+    if 'missing' in page:
+        raise ValueError("Page does not exist")
+
+    content = page.get('extract', '')
+    if not content:
+        raise ValueError("Empty article content")
+
+    return content

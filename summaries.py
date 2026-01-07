@@ -137,29 +137,3 @@ def save_summary_sql(book_id, summary, output_file):
 
     with open(output_file, "a") as f:
         f.write(f"{sql}\n")
-
-
-def is_valid_wikipedia_link_for_summary(wiki_links):
-    """Check if Wikipedia links are suitable for summary generation (placeholder)."""
-
-    # llm check returns positive
-    # if there are two you pick the longer one.
-    # too short ...
-    # test whether good for summary generation ...
-
-    return bool(wiki_links)
-
-
-
-def summarise_book_from_wikipedia(wiki_links, title):
-    """Generate book summary from Wikipedia page content (placeholder)."""
-    # TODO: Implement Wikipedia content fetching and summarization
-    # Steps to implement:
-    # 1. Fetch content from wiki_links[0] (primary link)
-    # 2. Extract relevant sections (intro, plot, overview)
-    # 3. Pass to GPT for summarization (similar to current approach)
-    # 4. Format and return
-
-    # For now, return formatted placeholder text
-    placeholder = f"[Wikipedia-based summary for '{title}' - To be implemented]"
-    return format_summary(placeholder)
