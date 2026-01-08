@@ -82,9 +82,15 @@ for book_id in range(start_id + 1, end_id + 1):
                         print(f"Summary: Generated from book content (no valid Wikipedia articles >= 280 words)")
                     else:
                         # Generate summary from selected Wikipedia article
-                        summary = generate_wiki_based_summary(article_text, title)
-                        summary = format_summary(summary)
-                        print(f"Summary: Generated from Wikipedia")
+                        wiki_summary = generate_wiki_based_summary(article_text, title)
+
+                        # Check if Wikipedia had insufficient information
+                        if "insufficient information" in wiki_summary.lower():
+                            summary = summarise_book(book_content, title)
+                            print(f"Summary: Generated from book content (Wikipedia had insufficient info)")
+                        else:
+                            summary = format_summary(wiki_summary)
+                            print(f"Summary: Generated from Wikipedia")
                 except Exception as e:
                     # Fallback to book content if selection process fails entirely
                     summary = summarise_book(book_content, title)
