@@ -50,7 +50,7 @@ for book_id in range(start_id + 1, end_id + 1):
         try:
             wiki_links = get_book_wikipedia_links(title, language)
 
-            # Extra Validation of Wikipedia links because basing summaries on incorrect wikipedia articles is really not good.
+            # Extra Validation of Wikipedia links to avoid basing summaries on wrong wikipedia articles
             authors_str = ", ".join([a['name'] for a in authors]) # note - it's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude may get confused when doing the validating.
             wiki_links = validate_wiki_links(wiki_links, title, authors_str)
             print(f"Book wiki: {wiki_links}")
@@ -73,26 +73,23 @@ for book_id in range(start_id + 1, end_id + 1):
         try:
             if wiki_links_found:
                 try:
-                    # New approach: Wiki-based summary with smart article selection
-                    article_text = select_wikipedia_article(wiki_links)
+                    # New approach: Wiki-based summary
+                    # Existing approach (based on book content) as fallback
+                    article_text = select_wikipedia_article(wiki_links) # exclude short wikipedia articles and if we have two, pick the longer one
 
-                    if article_text is None:
-                        # No valid Wikipedia article found (all too short or failed to download)
-                        summary = summarise_book(book_content, title)
-                        print(f"Summary: Generated from book content (no valid Wikipedia articles >= 280 words)")
-                    else:
-                        # Generate summary from selected Wikipedia article
+                    if article_text:
                         wiki_summary = generate_wiki_based_summary(article_text, title)
 
-                        # Check if Wikipedia had insufficient information
                         if "insufficient information" in wiki_summary.lower():
                             summary = summarise_book(book_content, title)
                             print(f"Summary: Generated from book content (Wikipedia had insufficient info)")
                         else:
                             summary = format_summary(wiki_summary)
                             print(f"Summary: Generated from Wikipedia")
+                    else:
+                        summary = summarise_book(book_content, title)
+                        print(f"Summary: Generated from book content.")
                 except Exception as e:
-                    # Fallback to book content if selection process fails entirely
                     summary = summarise_book(book_content, title)
                     print(f"Summary: Generated from book content (Wikipedia failed: {e})")
             else:
