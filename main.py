@@ -1,7 +1,7 @@
 # Main Script
 # Goes over all new book releases on Gutenberg since the last update was run and for each generates:
 # - Wikipedia links for the book
-# - Summary - based either on the wikipedia article or the book itself.
+# - Summary - either based on the book's wikipedia article if there is one, or based on the book itself.
 # - Readability score
 # - Categories
 # - Wikipedia links for the authors

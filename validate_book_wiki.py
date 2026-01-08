@@ -13,7 +13,7 @@ def validate_wiki_link(wiki_url: str, title: str, authors: str) -> bool:
     """Validate if Wikipedia article matches the book using Claude."""
     try:
         # Fetch Wikipedia content and truncate for validation
-        validation_length = 2000
+        validation_length = 3000
         content = download_wikipedia_article(wiki_url)[:validation_length]
 
         # Ask Claude if article matches the book

@@ -1,4 +1,4 @@
-"""Generate a single Wikipedia article summary using Claude API."""
+"""Generate wiki-based summaries using Claude API."""
 
 import anthropic
 import os
@@ -49,8 +49,8 @@ def truncate_to_words(text, word_limit):
     return ' '.join(words[:word_limit])
 
 
-def select_wikipedia_article(wiki_links, min_word_count=280):
-    """Select the longest Wikipedia article from wiki_links, excluding articles shorter than min_word_count."""
+def select_wikipedia_article(wiki_links, min_word_count=230):
+    """Exclude articles shorter than min_word_count (set at 230 words). If there are two wiki_links left, pick the longer one."""
     if not wiki_links:
         return None
 
@@ -78,7 +78,7 @@ def select_wikipedia_article(wiki_links, min_word_count=280):
 
 
 def generate_wiki_based_summary(article_text, gutenberg_title):
-    """Generate a summary for a single article using Claude API."""
+    """Generate a wiki-based summary using Claude API."""
     truncated = truncate_to_words(article_text, 1200)
     prompt = USER_PROMPT_TEMPLATE.format(gutenberg_title=gutenberg_title, article_text=truncated)
 
