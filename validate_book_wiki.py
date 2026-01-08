@@ -2,10 +2,9 @@
 
 import os
 import re
-from urllib.parse import unquote
-import requests
 import anthropic
 from dotenv import load_dotenv
+from utils import download_wikipedia_article
 
 load_dotenv()
 
@@ -13,39 +12,9 @@ load_dotenv()
 def validate_wiki_link(wiki_url: str, title: str, authors: str) -> bool:
     """Validate if Wikipedia article matches the book using Claude."""
     try:
-        # Extract page title from URL
-        match = re.search(r'(https?://[a-z]{2,3}\.wikipedia\.org)/wiki/(.+)$', wiki_url)
-        if not match:
-            return False
-
-        base_url = match.group(1)
-        page_title = unquote(match.group(2))
-
-        # Fetch Wikipedia content
-        response = requests.get(
-            f"{base_url}/w/api.php",
-            params={
-                'action': 'query',
-                'format': 'json',
-                'prop': 'extracts',
-                'explaintext': True,
-                'redirects': 1,
-                'titles': page_title
-            },
-            headers={'User-Agent': 'WikiValidation/1.0 (Educational project; Contact: joseikowsky@gmail.com)'},
-            timeout=30
-        )
-
-        data = response.json()
-        pages = data.get('query', {}).get('pages', {})
-        if not pages:
-            return False
-
-        page = next(iter(pages.values()))
-        content = page.get('extract', '')[:2000]
-
-        if not content:
-            return False
+        # Fetch Wikipedia content and truncate for validation
+        validation_length = 2000
+        content = download_wikipedia_article(wiki_url)[:validation_length]
 
         # Ask Claude if article matches the book
         client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))

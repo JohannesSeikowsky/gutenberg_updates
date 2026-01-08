@@ -2,10 +2,8 @@
 
 import anthropic
 import os
-import re
-import requests
-from urllib.parse import unquote
 from dotenv import load_dotenv
+from utils import download_wikipedia_article
 
 load_dotenv()
 anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
@@ -92,50 +90,3 @@ def generate_wiki_based_summary(article_text, gutenberg_title):
     )
 
     return message.content[0].text
-
-
-def download_wikipedia_article(url):
-    """Download Wikipedia article content from URL."""
-    # Extract language code from URL
-    lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', url)
-    if not lang_match:
-        raise ValueError(f"Could not extract language code from URL: {url}")
-    lang = lang_match.group(1)
-
-    # Extract page title from URL
-    title_match = re.search(r'/wiki/(.+)$', url.strip())
-    if not title_match:
-        raise ValueError(f"Could not extract page title from URL: {url}")
-    page_title = unquote(title_match.group(1))
-
-    # Call Wikipedia API
-    api_url = f"https://{lang}.wikipedia.org/w/api.php"
-    params = {
-        'action': 'query',
-        'format': 'json',
-        'prop': 'extracts',
-        'explaintext': True,
-        'redirects': 1,
-        'titles': page_title
-    }
-    headers = {'User-Agent': 'WikiBookScraper/1.0 (Educational project)'}
-
-    response = requests.get(api_url, params=params, headers=headers, timeout=30)
-    response.raise_for_status()
-
-    data = response.json()
-    pages = data.get('query', {}).get('pages', {})
-
-    if not pages:
-        raise ValueError("Empty API response")
-
-    page = next(iter(pages.values()))
-
-    if 'missing' in page:
-        raise ValueError("Page does not exist")
-
-    content = page.get('extract', '')
-    if not content:
-        raise ValueError("Empty article content")
-
-    return content
