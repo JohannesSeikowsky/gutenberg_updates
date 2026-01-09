@@ -16,7 +16,7 @@ from summaries import (
     save_summary_sql,
     format_summary
 )
-from wiki_based_summaries import download_wikipedia_article, generate_wiki_based_summary, select_wikipedia_article
+from wiki_based_summaries import download_wikipedia_article, generate_wiki_based_summary, exclude_short_articles, pick_longest_article
 from readability import calculate_readability_score, save_readability_sql
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis_sql
 from wiki_for_authors import (
@@ -39,38 +39,35 @@ errors_file = f"errors/errors_{month_year}.txt"
 for book_id in range(start_id + 1, end_id + 1):
     print(f"Book: {book_id}")
 
-    # Fetch all relevant data for book from Gutenberg once
+    # Fetch all relevant data from Gutenberg once
     book_content = get_book_content(book_id)
     title, language, authors, has_wiki_link = get_book_metadata(book_id)
+    authors_str = ", ".join([a['name'] for a in authors]) # It's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude will likely get confused when doing the "deep" valdation the validating.
     print(title, language, authors, has_wiki_link, sep="\n")
 
     # Find Wikipedia links for book
     if title and language:
         try:
-            authors_str = ", ".join([a['name'] for a in authors]) # It's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude may get confused when doing the validating.
             wiki_links = get_book_wikipedia_links(title, language, authors_str)
             print(f"Book wiki: {wiki_links}")
-
             save_book_wikis_sql(book_id, wiki_links, results_file)
-            wiki_links_found = bool(wiki_links)
         except Exception as e:
             print("Book wiki: Error")
             log_error(f"{book_id}, Book wiki, {e}", errors_file)
             wiki_links = []
-            wiki_links_found = False
     else:
         print("Book wiki: Skipped (missing data)")
         wiki_links = []
-        wiki_links_found = False
     time.sleep(STEP_DELAY)
 
     # Generate summary
     if book_content and title:
         try:
-            if wiki_links_found:
+            if wiki_links:
                 try:
                     # New approach: Wiki-based summary
-                    article_text = select_wikipedia_article(wiki_links) # exclude short wikipedia articles and if we have two, pick the longer one
+                    valid_articles = exclude_short_articles(wiki_links)
+                    article_text = pick_longest_article(valid_articles)
 
                     if article_text:
                         wiki_summary = generate_wiki_based_summary(article_text, title)

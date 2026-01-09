@@ -49,31 +49,33 @@ def truncate_to_words(text, word_limit):
     return ' '.join(words[:word_limit])
 
 
-def select_wikipedia_article(wiki_links, min_word_count=230):
-    """Exclude articles shorter than min_word_count (set at 230 words). If there are two wiki_links left, pick the longer one."""
+def exclude_short_articles(wiki_links, min_word_count=230):
+    """Download Wikipedia articles and exclude those shorter than min_word_count."""
     if not wiki_links:
-        return None
+        return []
 
-    # Step 1: Download all articles and exclude those shorter than min_word_count
-    articles_meeting_minimum = []
+    valid_articles = []
 
     for url in wiki_links:
         try:
             article_text = download_wikipedia_article(url)
             word_count = len(article_text.split())
 
-            # Exclude articles shorter than minimum
             if word_count >= min_word_count:
-                articles_meeting_minimum.append((article_text, word_count))
+                valid_articles.append((article_text, word_count))
         except Exception:
             # Skip articles that fail to download, continue with others
             continue
 
-    if not articles_meeting_minimum:
+    return valid_articles
+
+
+def pick_longest_article(articles):
+    """Select the longest article from a list of (article_text, word_count) tuples."""
+    if not articles:
         return None
 
-    # Step 2: Pick the longest article from remaining candidates
-    longest_article = max(articles_meeting_minimum, key=lambda x: x[1])
+    longest_article = max(articles, key=lambda x: x[1])
     return longest_article[0]
 
 
