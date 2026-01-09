@@ -45,7 +45,7 @@ for book_id in range(start_id + 1, end_id + 1):
     authors_str = ", ".join([a['name'] for a in authors]) # It's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude will likely get confused when doing the "deep" valdation the validating.
     print(title, language, authors, has_wiki_link, sep="\n")
 
-    # Find Wikipedia links for book
+    # Find Wikipedia links for book and validate them
     if title and language:
         try:
             wiki_links = get_book_wikipedia_links(title, language, authors_str)
@@ -65,7 +65,7 @@ for book_id in range(start_id + 1, end_id + 1):
         try:
             if wiki_links:
                 try:
-                    # New approach: Wiki-based summary
+                    # New approach: Wiki-based summary (Old approach used as fallback)
                     valid_articles = exclude_short_articles(wiki_links)
                     article_text = pick_longest_article(valid_articles)
 
@@ -74,7 +74,7 @@ for book_id in range(start_id + 1, end_id + 1):
 
                         if "insufficient information" in wiki_summary.lower():
                             summary = summarise_book(book_content, title)
-                            print(f"Summary: Generated from book content (Wikipedia had insufficient info)")
+                            print(f"Summary: Generated from book content.")
                         else:
                             summary = format_summary(wiki_summary)
                             print(f"Summary: Generated from Wikipedia")
