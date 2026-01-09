@@ -117,7 +117,7 @@ def summarise_entire_book(title_and_author, text):
 
 
 def summarise_book(book_content, title):
-    """Generate formatted summary for book, using full text or opening portion based on length."""
+    """Generate summary for book, using full text or opening portion based on length."""
     chunk_size = 24000
     print("Summarising:", title)
 
@@ -127,7 +127,7 @@ def summarise_book(book_content, title):
     else:
         summary = summarise_entire_book(title, book_content)
 
-    return format_summary(summary)
+    return summary
 
 
 def save_summary_sql(book_id, summary, output_file):

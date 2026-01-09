@@ -61,34 +61,33 @@ for book_id in range(start_id + 1, end_id + 1):
     time.sleep(STEP_DELAY)
 
     # Generate summary
+    # Try to do based on a Wikipedia article, if not possible fall back to book content method.
     if book_content and title:
         try:
+            summary = None
+            # New approach: summary based on Wikipedia article
             if wiki_links:
                 try:
-                    # New approach: Wiki-based summary (Old approach used as fallback)
                     valid_articles = exclude_short_articles(wiki_links)
                     article_text = pick_longest_article(valid_articles)
 
                     if article_text:
-                        wiki_summary = generate_wiki_based_summary(article_text, title)
+                        summary = generate_wiki_based_summary(article_text, title)
+                        # Claude may decide that there's not enough information for a summary.
+                        if "insufficient information" in summary.lower():
+                            summary = None
+                except Exception:
+                    summary = None
 
-                        if "insufficient information" in wiki_summary.lower():
-                            summary = summarise_book(book_content, title)
-                            print(f"Summary: Generated from book content.")
-                        else:
-                            summary = format_summary(wiki_summary)
-                            print(f"Summary: Generated from Wikipedia")
-                    else:
-                        summary = summarise_book(book_content, title)
-                        print(f"Summary: Generated from book content.")
-                except Exception as e:
-                    summary = summarise_book(book_content, title)
-                    print(f"Summary: Generated from book content (Wikipedia failed: {e})")
-            else:
-                # Existing approach: summary from book content
+            if summary:
+                print(f"Summary: Generated from Wikipedia")
+
+            # Existing approach: summary from book content
+            if not summary:
                 summary = summarise_book(book_content, title)
                 print(f"Summary: Generated from book content")
 
+            summary = format_summary(summary)
             save_summary_sql(book_id, summary, results_file)
         except Exception as e:
             print("Summary: Error")
