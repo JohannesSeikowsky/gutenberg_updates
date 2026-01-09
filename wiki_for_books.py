@@ -1,15 +1,20 @@
 # Finds Wikipedia links for books
 # We use Serper (Google search API) to search for wikipedia links related to the book.
-# Then we use ChatGPT to filter for those wikipedia link(s) that are actually about the book (not about the author or a film or whatnot)
+# Then we validate using two layers:
+#   Layer 1 (GPT): Validates against Wikipedia summaries to confirm the page is about the book itself (not author articles, film adaptations, etc.)
+#   Layer 2 (Claude): Deep validation against full article content (first 3000 chars) using book title + authors
 # For non-English books, we search for both the English and the native language Wikipedia pages.
 
 import wikipedia
 import urllib.parse
+import re
 from pydantic import BaseModel
 from openai import OpenAI
+import anthropic
 import requests
 import os
 from dotenv import load_dotenv
+from utils import download_wikipedia_article
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -84,8 +89,48 @@ def find_matching_wikipedia_page(candidate_urls, book_title, required_language=N
     return None
 
 
-def get_book_wikipedia_links(book_title, book_language):
-    """Finds Wikipedia links for book in English and native language."""
+def validate_with_claude(wiki_url, title, authors_str):
+    """Validate if Wikipedia article matches the book using Claude on full content."""
+    try:
+        validation_length = 3000
+        content = download_wikipedia_article(wiki_url)[:validation_length]
+
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        response = client.messages.create(
+            model="claude-sonnet-4-5-20250929",
+            max_tokens=500,
+            messages=[{
+                "role": "user",
+                "content": f"""Does this Wikipedia article match the work listed below?
+
+WORK:
+- Title: {title}
+- Author(s): {authors_str}
+
+WIKIPEDIA ARTICLE (first 3000 chars):
+```
+{content}
+```
+
+Is the Wikipedia article about this work? Ignore edition details (translations, volumes, annotations).
+
+Respond:
+VERDICT: [YES/NO]
+CONFIDENCE: [HIGH/MEDIUM/LOW]
+REASONING: [one very short sentence]"""
+            }]
+        )
+
+        answer = response.content[0].text
+        verdict_match = re.search(r'VERDICT:\s*(YES|NO)', answer, re.IGNORECASE)
+        return verdict_match and verdict_match.group(1).upper() == "YES"
+
+    except Exception:
+        return False
+
+
+def get_book_wikipedia_links(book_title, book_language, authors_str):
+    """Finds and validates Wikipedia links for book in English and native language using two-layer validation."""
     search_results = google_search_with_serper(f"{book_title} wikipedia")
 
     unwanted_url_patterns = ["simple.", "File:", "/Category:", "(disambiguation)"]
@@ -104,7 +149,12 @@ def get_book_wikipedia_links(book_title, book_language):
     if book_language != "English" and (native_match := find_matching_wikipedia_page(native_wiki_urls, book_title, book_language)):
         matched_urls.append(native_match)
 
-    return matched_urls
+    # Layer 2: Claude validation on full content
+    validated_urls = []
+    for url in matched_urls:
+        if validate_with_claude(url, book_title, authors_str):
+            validated_urls.append(url)
+    return validated_urls
 
 
 def save_book_wikis_sql(book_id, wiki_urls, output_file):

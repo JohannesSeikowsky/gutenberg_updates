@@ -19,7 +19,6 @@ from summaries import (
 from wiki_based_summaries import download_wikipedia_article, generate_wiki_based_summary, select_wikipedia_article
 from readability import calculate_readability_score, save_readability_sql
 from wiki_for_books import get_book_wikipedia_links, save_book_wikis_sql
-from validate_book_wiki import validate_wiki_links
 from wiki_for_authors import (
     get_author_metadata,
     get_author_wikipedia_link,
@@ -48,11 +47,8 @@ for book_id in range(start_id + 1, end_id + 1):
     # Find Wikipedia links for book
     if title and language:
         try:
-            wiki_links = get_book_wikipedia_links(title, language)
-
-            # Extra Validation of Wikipedia links to avoid basing summaries on wrong wikipedia articles
-            authors_str = ", ".join([a['name'] for a in authors]) # note - it's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude may get confused when doing the validating.
-            wiki_links = validate_wiki_links(wiki_links, title, authors_str)
+            authors_str = ", ".join([a['name'] for a in authors]) # It's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude may get confused when doing the validating.
+            wiki_links = get_book_wikipedia_links(title, language, authors_str)
             print(f"Book wiki: {wiki_links}")
 
             save_book_wikis_sql(book_id, wiki_links, results_file)
@@ -74,7 +70,6 @@ for book_id in range(start_id + 1, end_id + 1):
             if wiki_links_found:
                 try:
                     # New approach: Wiki-based summary
-                    # Existing approach (based on book content) as fallback
                     article_text = select_wikipedia_article(wiki_links) # exclude short wikipedia articles and if we have two, pick the longer one
 
                     if article_text:

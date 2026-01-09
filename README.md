@@ -2,7 +2,7 @@
 The system runs once a month to process all books that have been newly published on Project Gutenberg since the last run (usually that's around 200 new books). For each of these new books we do 5 things: generate a summary (using Wikipedia article if available, otherwise from book content), assign the book to the appropriate "Main Categories" using ChatGPT, calculate a readability score (Flesch–Kincaid readability test), try to find wikipedia links for the book and finally also try to find wikipedia links for the author(s).
 
 ## Architecture
-`main.py` is the main script that orchestrates this five-step pipeline for each book. It's deliberately simple and straightforward. There's a separate file for each of the five steps: `summaries.py` (book content summaries), `wiki_based_summaries.py` (Wikipedia-based summaries), `categories.py`, `readability.py`, `wiki_for_books.py` (with validation in `validate_book_wiki.py`), `wiki_for_authors.py`
+`main.py` is the main script that orchestrates this five-step pipeline for each book. It's deliberately simple and straightforward. There's a separate file for each of the five steps: `summaries.py` (book content summaries), `wiki_based_summaries.py` (Wikipedia-based summaries), `categories.py`, `readability.py`, `wiki_for_books.py` (includes two-layer validation), `wiki_for_authors.py`
 
 The data that's necessary to run this pipeline is obtained by scraping the Project Gutenberg once for each book (see main.py). I suspect a better integration with the publishing process may be possible.
 
