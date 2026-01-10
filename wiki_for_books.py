@@ -1,7 +1,7 @@
 # Finds Wikipedia links for books
 # We use Serper (Google search API) to search for wikipedia links related to the book.
 # Then we validate using two layers:
-#   Layer 1 (GPT): Validates against Wikipedia summaries to confirm the page is about the book itself (not author articles, film adaptations, etc.)
+#   Layer 1 (GPT): Validates against Wikipedia summaries to filter out author articles, film adaptations, etc.
 #   Layer 2 (Claude): Deep validation against full article content (first 3000 chars) using book title + authors
 # For non-English books, we search for both the English and the native language Wikipedia pages.
 
