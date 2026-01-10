@@ -8,6 +8,14 @@ from readability import calculate_readability_score
 from wiki_for_books import get_book_wikipedia_links
 from wiki_for_authors import get_author_metadata, get_author_wikipedia_link
 
+# Open test_results.txt for writing (overrides previous content)
+output_file = open('test_results.txt', 'w')
+
+def log(message=''):
+    """Print to console and write to test_results.txt."""
+    print(message)
+    output_file.write(message + '\n')
+
 test_case = 25500
 # 35500 # no wikipedia article
 # 25500 # one wikipedia article
