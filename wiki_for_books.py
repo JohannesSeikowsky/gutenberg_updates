@@ -80,9 +80,13 @@ Return correct_wikipedia_page: true if this is the book's Wikipedia article, fal
 def find_matching_wikipedia_page(candidate_urls, book_title, required_language=None):
     """Returns first URL confirmed to be the book's Wikipedia page."""
     for url in candidate_urls:
+        print(f"      Checking: {url}")
         try:
             wiki_excerpt = get_wikipedia_summary(url)
-            if confirm_wikipedia_page(book_title, wiki_excerpt, required_language):
+            print(f"        Got summary ({len(wiki_excerpt)} chars)")
+            gpt_verdict = confirm_wikipedia_page(book_title, wiki_excerpt, required_language)
+            print(f"        GPT verdict: {gpt_verdict}")
+            if gpt_verdict:
                 return url
         except Exception as e:
             print(f"Error checking {url}: {e}")
@@ -91,9 +95,11 @@ def find_matching_wikipedia_page(candidate_urls, book_title, required_language=N
 
 def validate_with_claude(wiki_url, title, authors_str):
     """Validate if Wikipedia article matches the book using Claude on full content."""
+    print(f"    Validating with Claude: {wiki_url}")
     try:
         validation_length = 3000
         content = download_wikipedia_article(wiki_url)[:validation_length]
+        print(f"      Downloaded article: {len(content)} chars")
 
         client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         response = client.messages.create(
@@ -122,38 +128,63 @@ REASONING: [one very short sentence]"""
         )
 
         answer = response.content[0].text
+        print(f"      Claude response:\n{answer}")
         verdict_match = re.search(r'VERDICT:\s*(YES|NO)', answer, re.IGNORECASE)
-        return verdict_match and verdict_match.group(1).upper() == "YES"
+        result = verdict_match and verdict_match.group(1).upper() == "YES"
+        print(f"      Validation result: {result}")
+        return result
 
-    except Exception:
+    except Exception as e:
+        print(f"      Error during validation: {e}")
         return False
 
 
 def get_book_wikipedia_links(book_title, book_language, authors_str):
     """Finds and validates Wikipedia links for book in English and native language using two-layer validation."""
     search_results = google_search_with_serper(f"{book_title} wikipedia")
+    print(f"  Serper: Found {len(search_results)} total URLs")
 
     unwanted_url_patterns = ["simple.", "File:", "/Category:", "(disambiguation)"]
     wiki_urls = [
         url for url in search_results
         if "wikipedia.org" in url and not any(pattern in url for pattern in unwanted_url_patterns)
     ]
+    print(f"  Filtered to {len(wiki_urls)} Wikipedia URLs (removed non-wiki and unwanted patterns)")
 
     english_wiki_urls = [url for url in wiki_urls if url.startswith("https://en.wikipedia.org/")]
     native_wiki_urls = [url for url in wiki_urls if not url.startswith("https://en.wikipedia.org/")]
+    print(f"    - English URLs: {len(english_wiki_urls)}")
+    print(f"    - Native language URLs: {len(native_wiki_urls)}")
 
     matched_urls = []
     if english_match := find_matching_wikipedia_page(english_wiki_urls, book_title):
         matched_urls.append(english_match)
+        print(f"  ✓ Layer 1 passed (English): {english_match}")
+    elif english_wiki_urls:
+        print(f"  ✗ Layer 1: No English URLs passed GPT validation")
 
     if book_language != "English" and (native_match := find_matching_wikipedia_page(native_wiki_urls, book_title, book_language)):
         matched_urls.append(native_match)
+        print(f"  ✓ Layer 1 passed ({book_language}): {native_match}")
+    elif book_language != "English" and native_wiki_urls:
+        print(f"  ✗ Layer 1: No {book_language} URLs passed GPT validation")
 
     # Layer 2: Claude validation on full content
+    if matched_urls:
+        print(f"  Layer 2 (Claude): Validating {len(matched_urls)} URL(s)...")
     validated_urls = []
     for url in matched_urls:
         if validate_with_claude(url, book_title, authors_str):
             validated_urls.append(url)
+            print(f"  ✓ Layer 2 passed: {url}")
+        else:
+            print(f"  ✗ Layer 2 failed: {url}")
+
+    if validated_urls:
+        print(f"  Final: {len(validated_urls)} validated URL(s)")
+    else:
+        print(f"  Final: No URLs passed both validation layers")
+
     return validated_urls
 
 

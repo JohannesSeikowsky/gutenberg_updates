@@ -19,7 +19,7 @@ Errors are saved in the `errors/` directory in a file named after the current mo
 - `categories.txt` — Master list of the 72 Main categories and their ids
 
 ## Tests
-The code in `tests.py` runs the pipeline for a representative test case. Super minimalistic but still useful after changes to ensure the major functionalities still work.
+`tests.py` runs the complete pipeline for a test book with detailed debug output showing each step's progress, API calls, and validation decisions.
 
 ## Setup
 Add API keys (OpenAI, Serper and Perplexity) to `.env`, then `pip install -r requirements.txt`.

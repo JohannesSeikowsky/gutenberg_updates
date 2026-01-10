@@ -41,10 +41,10 @@ for book_id in range(start_id + 1, end_id + 1):
 
     # Fetch all relevant data from Gutenberg once
     book_content = get_book_content(book_id)
-    title, language, authors, has_wiki_link = get_book_metadata(book_id)
-    # It's important that it's clear in this string who the main author is versus who the editors, translators etc. are. Else Claude will likely get confused when doing the "deep" validation.
+    title, language, authors, _ = get_book_metadata(book_id)
+    # It's important that it's clear in author_str who the main author is versus who the editors, translators etc. are. Else Claude will likely get confused when doing the "deep" validation.
     authors_str = ", ".join([a['name'] for a in authors]) if authors else ""
-    print(title, language, authors, has_wiki_link, sep="\n")
+    print(title, language, authors, sep="\n")
 
 
     # Find Wikipedia link(s) for book
