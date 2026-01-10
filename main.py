@@ -37,28 +37,37 @@ results_file = f"results/update_{month_year}.txt"
 errors_file = f"errors/errors_{month_year}.txt"
 
 for book_id in range(start_id + 1, end_id + 1):
-    print(f"Book: {book_id}")
-
     # Fetch all relevant data from Gutenberg once
     book_content = get_book_content(book_id)
     title, language, authors, _ = get_book_metadata(book_id)
     # It's important that it's clear in author_str who the main author is versus who the editors, translators etc. are. Else Claude will likely get confused when doing the "deep" validation.
     authors_str = ", ".join([a['name'] for a in authors]) if authors else ""
-    print(title, language, authors, sep="\n")
+
+    # Print book header
+    separator = "═" * 60
+    title_display = title if title else "Unknown Title"
+    language_display = language if language else "Unknown"
+    authors_display = authors_str if authors_str else "Unknown"
+    print(f"\n{separator}")
+    print(f"Book #{book_id}: {title_display}")
+    print(f"Language: {language_display} | Authors: {authors_display}")
+    print(f"{separator}\n")
 
 
     # Find Wikipedia link(s) for book
     if title and language and authors_str:
         try:
             wiki_links = get_book_wikipedia_links(title, language, authors_str)
-            print(f"Book wiki: {wiki_links}")
+            count = len(wiki_links)
+            result = f"{count} validated" if count > 0 else "No match found"
+            print(f"[Step 1/5] Book Wikipedia: {result}")
             save_book_wikis_sql(book_id, wiki_links, results_file)
         except Exception as e:
-            print("Book wiki: Error")
+            print("[Step 1/5] Book Wikipedia: Error")
             log_error(f"{book_id}, Book wiki, {e}", errors_file)
             wiki_links = []
     else:
-        print("Book wiki: Skipped (missing data)")
+        print("[Step 1/5] Book Wikipedia: Skipped (missing data)")
         wiki_links = []
     time.sleep(STEP_DELAY)
 
@@ -71,6 +80,7 @@ for book_id in range(start_id + 1, end_id + 1):
             # New approach: summarise using a Wikipedia article
             if wiki_links:
                 try:
+                    print("  Generating summary from Wikipedia...")
                     valid_articles = exclude_short_articles(wiki_links)
                     article_text = pick_longest_article(valid_articles)
 
@@ -83,24 +93,24 @@ for book_id in range(start_id + 1, end_id + 1):
                     summary = None
 
             if summary:
-                print(f"Summary: Generated from Wikipedia")
+                print(f"[Step 2/5] Summary: Generated from Wikipedia")
 
             # Existing approach: summarise using book content
             if not summary and book_content:
                 summary = summarise_book(book_content, title)
-                print(f"Summary: Generated from book content")
+                print(f"[Step 2/5] Summary: Generated from book content")
 
             if summary:
                 summary = format_summary(summary)
                 save_summary_sql(book_id, summary, results_file)
             else:
-                print("Summary: Could not generate")
+                print("[Step 2/5] Summary: Could not generate")
         except Exception as e:
-            print("Summary: Error")
+            print("[Step 2/5] Summary: Error")
             log_error(f"{book_id}, Summary, {e}", errors_file)
             summary = None
     else:
-        print("Summary: Skipped (missing data)")
+        print("[Step 2/5] Summary: Skipped (missing data)")
         summary = None
     time.sleep(STEP_DELAY)
 
@@ -108,28 +118,31 @@ for book_id in range(start_id + 1, end_id + 1):
     # Generate categories
     if summary:
         try:
+            print("  Assigning categories...")
             categories = get_categories(book_id, summary)
-            print(f"Categories: {categories}")
+            categories_str = ", ".join(categories)
+            print(f"[Step 3/5] Categories: {categories_str}")
             save_categories_sql(book_id, categories, results_file)
         except Exception as e:
-            print("Categories: Error")
+            print("[Step 3/5] Categories: Error")
             log_error(f"{book_id}, Categories, {e}", errors_file)
     else:
-        print("Categories: Skipped (missing summary)")
+        print("[Step 3/5] Categories: Skipped (missing summary)")
     time.sleep(STEP_DELAY)
 
 
     # Calculate readability score
     if book_content:
         try:
+            print("  Calculating readability...")
             readability = calculate_readability_score(book_content)
-            print(f"Readability: {readability}")
+            print(f"[Step 4/5] Readability: {readability}")
             save_readability_sql(book_id, readability, results_file)
         except Exception as e:
-            print("Readability: Error")
+            print("[Step 4/5] Readability: Error")
             log_error(f"{book_id}, Readability, {e}", errors_file)
     else:
-        print("Readability: Skipped (missing data)")
+        print("[Step 4/5] Readability: Skipped (missing data)")
     time.sleep(STEP_DELAY)
 
 
@@ -144,16 +157,15 @@ for book_id in range(start_id + 1, end_id + 1):
                     wiki_link = get_author_wikipedia_link(author, author_metadata)
                     if wiki_link:
                         save_author_wiki_sql(author_id, wiki_link, results_file)
-                        print(f"Author wiki: {wiki_link}")
+                        print(f"[Step 5/5] Author Wikipedia: {wiki_link}")
                     else:
-                        print("Author wiki: Not found")
+                        print("[Step 5/5] Author Wikipedia: Not found")
                 else:
-                    print("Author already has a Wikipedia link")
+                    print("[Step 5/5] Author Wikipedia: Already has link")
             except Exception as e:
                 log_error(f"{book_id}, Author wiki {author_id}, {e}", errors_file)
     else:
-        print("Author wiki: Skipped (no authors)")
+        print("[Step 5/5] Author Wikipedia: Skipped (no authors)")
     time.sleep(STEP_DELAY)
 
     save_last_processed_id(book_id)
-    print("---------------------")

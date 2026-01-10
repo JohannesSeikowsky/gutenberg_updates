@@ -81,8 +81,7 @@ def query_perplexity_api(prompt):
         )
         response.raise_for_status()
         return response.json()['choices'][0]['message']['content']
-    except Exception as e:
-        print(f"Perplexity error: {e}")
+    except Exception:
         return "perplexity_error"
 
 
@@ -97,7 +96,6 @@ def search_author_wikipedia(author_name, life_dates, book_titles):
     elif death_year:
         prompt = f"Find the wikipedia link of {author_name} who died in {death_year} if it exists. Make sure the year of death matches exactly. {NAME_MATCH_INSTRUCTIONS} {COMMON_INSTRUCTIONS}"
     else:
-        print("No Life Dates.")
         work_type = "book or script" if len(book_titles) == 1 else "books or scripts"
         reference_phrase = f'the aforementioned work called "{book_titles[0]}"' if len(book_titles) == 1 else "at least one of the aforementioned works"
         titles_list = f"\n  - {book_titles[0]}" if len(book_titles) == 1 else "\n  - " + "\n  - ".join(book_titles)
@@ -129,8 +127,7 @@ def get_author_metadata(author_id):
         has_wiki_link = any("wikipedia.org" in (link.get("href", "")) for link in soup.find_all("a"))
 
         return {'book_titles': titles, 'has_wiki_link': has_wiki_link}
-    except requests.RequestException as e:
-        print(f"Error fetching author metadata: {e}")
+    except requests.RequestException:
         return None
 
 
@@ -146,8 +143,7 @@ def is_valid_wikipedia_page(url):
         response.raise_for_status()
 
         return not any(text in response.text for text in WIKIPEDIA_NOT_FOUND_TEXTS)
-    except Exception as e:
-        print(f"Validation error for {url}: {e}")
+    except Exception:
         return False
 
 
@@ -161,6 +157,7 @@ def save_author_wiki_sql(author_id, wikipedia_url, results_file):
 
 def get_author_wikipedia_link(author, author_metadata):
     """Find and validate Wikipedia link for an author."""
+    print(f"  Searching for {author['name']}...")
     wikipedia_url = search_author_wikipedia(
         author['name'],
         author['life_dates'],

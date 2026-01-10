@@ -31,11 +31,9 @@ def google_search_with_serper(query):
 
 def validate_with_claude(wiki_url, title, authors_str):
     """Validate if Wikipedia article matches the book using Claude on full content."""
-    print(f"    Checking: {wiki_url}")
     try:
         validation_length = 3000
         content = download_wikipedia_article(wiki_url)[:validation_length]
-        print(f"      Downloaded article: {len(content)} chars")
 
         response = anthropic_client.messages.create(
             model="claude-sonnet-4-5-20250929",
@@ -63,14 +61,11 @@ REASONING: [one very short sentence]"""
         )
 
         answer = response.content[0].text
-        print(f"      Claude response:\n{answer}")
         verdict_match = re.search(r'VERDICT:\s*(YES|NO)', answer, re.IGNORECASE)
         result = verdict_match and verdict_match.group(1).upper() == "YES"
-        print(f"      Validation result: {result}")
         return result
 
-    except Exception as e:
-        print(f"      Error during validation: {e}")
+    except Exception:
         return False
 
 
@@ -88,30 +83,20 @@ def find_first_matching_url(urls, book_title, authors_str, language_label):
     if not urls:
         return None
 
-    print(f"  Checking {language_label} URLs...")
     for url in urls:
         if validate_with_claude(url, book_title, authors_str):
-            print(f"  ✓ {language_label} match found: {url}")
             return url
-        else:
-            print(f"  ✗ Not a match: {url}")
-
-    print(f"  ✗ No {language_label} URLs validated")
     return None
 
 
 def get_book_wikipedia_links(book_title, book_language, authors_str):
     """Finds and validates Wikipedia links for book in English and native language using Claude."""
+    print("  Searching and validating Wikipedia links...")
     search_results = google_search_with_serper(f"{book_title} wikipedia")
-    print(f"  Serper: Found {len(search_results)} total URLs")
-
     wiki_urls = filter_wikipedia_urls(search_results)
-    print(f"  Filtered to {len(wiki_urls)} Wikipedia URLs")
 
     english_wiki_urls = [url for url in wiki_urls if url.startswith("https://en.wikipedia.org/")]
     native_wiki_urls = [url for url in wiki_urls if not url.startswith("https://en.wikipedia.org/")]
-    print(f"    - English URLs: {len(english_wiki_urls)}")
-    print(f"    - Native language URLs: {len(native_wiki_urls)}")
 
     validated_urls = []
 
@@ -123,11 +108,6 @@ def get_book_wikipedia_links(book_title, book_language, authors_str):
     if book_language != "English":
         if native_match := find_first_matching_url(native_wiki_urls, book_title, authors_str, book_language):
             validated_urls.append(native_match)
-
-    if validated_urls:
-        print(f"  Final: {len(validated_urls)} validated URL(s)")
-    else:
-        print(f"  Final: No URLs validated")
 
     return validated_urls
 

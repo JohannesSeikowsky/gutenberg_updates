@@ -59,8 +59,8 @@ def get_book_content(book_id):
         )
         response.raise_for_status()
         return remove_gutenberg_wrapper(response.text)
-    except requests.RequestException as e:
-        print(f"Error fetching book from website: {e}")
+    except requests.RequestException:
+        print("Error: Failed to fetch book content")
         return None
 
 
@@ -126,8 +126,8 @@ def get_book_metadata(book_id):
             if 'wikipedia.org' in str(row):
                 metadata['has_wiki_link'] = True
 
-    except requests.RequestException as error:
-        print(f"Error fetching book metadata: {error}")
+    except requests.RequestException:
+        print("Error: Failed to fetch book metadata")
 
     return metadata['title'], metadata['language'], metadata['authors'], metadata['has_wiki_link']
 

@@ -36,8 +36,8 @@ Make sure to base EVERYTHING on the content of the Wikipedia article! Do NOT add
 
 Always write in English, even if the Wikipedia article is in a different language.
 
-On occasion it is possible that the Wikipedia article does not have enough relevant information for you to write a reasonable introduction-text.
-i.e. it doesn't allow you to write a summary that conveys what the work is principally about.
+It is possible that the Wikipedia article does not have enough relevant information for you to write a reasonable introduction-text.
+i.e. it does not allow you to write a summary that conveys what the work is principally about based solely on that wikipedia articles' content.
 If that is so, please return "insufficient information"
 
 <WIKIPEDIA ARTICLE>

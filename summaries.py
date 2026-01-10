@@ -118,8 +118,8 @@ def summarise_entire_book(title_and_author, text):
 
 def summarise_book(book_content, title):
     """Generate summary for book, using full text or opening portion based on length."""
+    print("  Generating summary from book content...")
     chunk_size = 24000
-    print("Summarising:", title)
 
     if count_tokens(book_content) > chunk_size:
         beginning_of_book = get_first_chunk(book_content, chunk_size)
