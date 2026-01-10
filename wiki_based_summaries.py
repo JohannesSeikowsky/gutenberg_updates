@@ -1,4 +1,8 @@
-"""Generate wiki-based summaries using Claude API."""
+# Generate Wikipedia-based summaries using Claude
+# Filters articles by minimum 230 words, selects longest if multiple available.
+# Truncates articles to 1200 words before sending to Claude for summarization.
+# Claude generates 80-90 word teaser-style introduction based solely on Wikipedia content.
+# Returns "insufficient information" if article lacks enough detail for a meaningful summary.
 
 import anthropic
 import os

@@ -19,7 +19,7 @@ Errors are saved in the `errors/` directory in a file named after the current mo
 - `categories.txt` — Master list of the 72 Main categories and their ids
 
 ## Tests
-`tests.py` runs the complete pipeline for a test book with detailed debug output showing each step's progress, API calls, and validation decisions. Output is written to both console and `test_results.txt`.
+`tests.py` runs the complete pipeline for three test books with detailed debug output showing each step's progress, API calls, and validation decisions. Tests cover different Wikipedia scenarios: no article found, one article found, and two articles found. Output is written to both console and `test_results.txt`.
 
 ## Setup
 Add API keys (OpenAI, Anthropic, Serper and Perplexity) to `.env`, then `pip install -r requirements.txt`.
@@ -31,7 +31,6 @@ Add API keys (OpenAI, Anthropic, Serper and Perplexity) to `.env`, then `pip ins
 - Integration with the continual publishing process of new books. This is by far the most important thing!
 - Maybe there's a better way than scraping to get the necessary data into the pipeline. Would seem like a natural part of the integration into the publishing process.
 - I havent had time to thoroughly check whether the error logging logic does a solid job or could be improved.
-- tests.py could very easily be extended to run for more than just 1 test case
 - `process_sql_results.py` can be made redudant by adjusting the saving functions
 
 **Note: a LOT depends on the integration of this pipeline into the "normal" publishing process, which is why that's No1 on this list.**
