@@ -31,7 +31,7 @@ for idx, test_case in enumerate(test_cases, 1):
     log("Fetching book data from Gutenberg...")
     book_content = get_book_content(test_case)
     title, language, authors = get_book_metadata(test_case)
-    authors_str = ", ".join([a['name'] for a in authors]) if authors else ""
+    authors_str = "; ".join([a['name'] for a in authors if a['role'] == 'Author']) if authors else ""
 
     log(f"  Title: {title}")
     log(f"  Language: {language}")

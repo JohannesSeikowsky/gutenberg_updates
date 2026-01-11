@@ -50,7 +50,7 @@ for book_id in range(start_id + 1, end_id + 1):
 
     book_content = get_book_content(book_id)
     title, language, authors = get_book_metadata(book_id)
-    authors_str = ", ".join([a['name'] for a in authors]) if authors else ""
+    authors_str = "; ".join([a['name'] for a in authors if a['role'] == 'Author']) if authors else ""
 
 
     # Print book header
