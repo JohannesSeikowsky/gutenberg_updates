@@ -38,20 +38,23 @@ def validate_with_claude(wiki_url, title, authors_str):
         response = anthropic_client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=500,
+            system="You are a specialist at evaluating whether a certain Wikipedia article belongs to a specific literary work.",
             messages=[{
                 "role": "user",
-                "content": f"""Does this Wikipedia article match the work listed below?
+                "content": f"""I would like to check whether a particular Wikipedia article is the correct one for a literary work I've found online on Project Gutenberg. Here is some basic information about the work taken from Project Gutenberg, followed by the first 3000 characters of the Wikipedia article.
 
-WORK:
+WORK (basic info):
 - Title: {title}
 - Author(s): {authors_str}
 
-WIKIPEDIA ARTICLE (first 3000 chars):
+WIKIPEDIA ARTICLE (first 3000 characters):
 ```
 {content}
 ```
 
-Is the Wikipedia article about this work? Ignore edition details (translations, volumes, annotations).
+In your opinion is this Wikipedia article the correct one for the WORK in question?
+- Ignore edition details (translations, volumes, annotations)
+- We are NOT interested in Wikipedia articles of the author, of movies based on the work or anything else. We are only interested in the Wikipedia article of the literary work itself.
 
 Respond:
 VERDICT: [YES/NO]
