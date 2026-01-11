@@ -2,7 +2,7 @@
 The system runs once a month to process all books that have been newly published on Project Gutenberg since the last run (usually that's around 200 new books). For each of these new books we do 5 things: find Wikipedia links for the book, generate a summary (using Wikipedia article if available, otherwise from book content), assign the book to the appropriate "Main Categories" using ChatGPT, calculate a readability score (Flesch–Kincaid readability test), and finally find Wikipedia links for the author(s).
 
 ## Architecture
-`main.py` is the main script that orchestrates this five-step pipeline for each book. It's deliberately simple and straightforward. The steps execute in this order: `wiki_for_books.py` (finds and validates Wikipedia links using Claude), `summaries.py` and `wiki_based_summaries.py` (generate summary from Wikipedia or book content), `categories.py` (assigns categories), `readability.py` (calculates readability score), `wiki_for_authors.py` (finds author Wikipedia links)
+`main.py` is the main script that orchestrates this five-step pipeline for each book. It's deliberately simple and straightforward. The steps execute in this order: `wiki_for_books.py` (finds and validates Wikipedia links using Claude - validation ensures articles are about the book as a published work, not just subject matter), `summaries.py` and `wiki_based_summaries.py` (generate summary from Wikipedia or book content), `categories.py` (assigns categories), `readability.py` (calculates readability score), `wiki_for_authors.py` (finds author Wikipedia links)
 
 The data that's necessary to run this pipeline is obtained by scraping the Project Gutenberg once for each book (see main.py). I suspect a better integration with the publishing process may be possible.
 
@@ -19,7 +19,7 @@ Errors are saved in the `errors/` directory in a file named after the current mo
 - `categories.txt` — Master list of the 72 Main categories and their ids
 
 ## Tests
-`tests.py` runs the complete pipeline for three test books with detailed debug output showing each step's progress, API calls, and validation decisions. Tests cover different Wikipedia scenarios: no article found, one article found, and two articles found. Output is written to both console and `test_results.txt`.
+`tests.py` runs the complete pipeline for multiple test books with detailed debug output showing each step's progress, API calls, and validation decisions. Tests cover various Wikipedia scenarios including books with no articles, single articles, multiple articles, and edge cases. Output is written incrementally to both console and `test_results.txt`.
 
 ## Setup
 Add API keys (OpenAI, Anthropic, Serper and Perplexity) to `.env`, then `pip install -r requirements.txt`.

@@ -21,7 +21,13 @@ def log(message=''):
 test_cases = [
     35500,  # no wikipedia article
     25500,  # one wikipedia article
-    2229    # two wikipedia articles
+    2229,   # two wikipedia articles
+    77204,  # Roosevelt expedition
+    77155,
+    77162,
+    77167,
+    77174,
+    77211   # Bruges-la-Morte (Finnish)
 ]
 
 for idx, test_case in enumerate(test_cases, 1):

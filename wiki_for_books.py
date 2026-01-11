@@ -41,7 +41,7 @@ def validate_with_claude(wiki_url, title, authors_str):
             system="You are a specialist at evaluating whether a certain Wikipedia article belongs to a specific literary work.",
             messages=[{
                 "role": "user",
-                "content": f"""I would like to check whether a particular Wikipedia article is the correct one for a literary work I've found online on Project Gutenberg. Here is some basic information about the work taken from Project Gutenberg, followed by the first 3000 characters of the Wikipedia article.
+                "content": f"""I would like to check whether a particular Wikipedia article is about a literary work that I've found on Project Gutenberg. I will give you basic information about that literary work and the first 3000 characters of the Wikipedia article.
 
 WORK (basic info):
 - Title: {title}
@@ -52,9 +52,14 @@ WIKIPEDIA ARTICLE (first 3000 characters):
 {content}
 ```
 
-In your opinion is this Wikipedia article the correct one for the WORK in question?
-- Ignore edition details (translations, volumes, annotations)
-- We are NOT interested in Wikipedia articles of the author, of movies based on the work or anything else. We are only interested in the Wikipedia article of the literary work itself.
+Is this Wikipedia article ABOUT THIS BOOK as a published literary work?
+
+IMPORTANT: We want articles about the BOOK itself (its publication, literary significance, editions, reception). We do NOT want:
+- Articles about the author
+- Articles about movies/adaptations based on the book
+- Articles about the events, people, or subject matter that the book describes 
+
+Ignore minor edition details (translations, volumes, annotations).
 
 Respond:
 VERDICT: [YES/NO]
