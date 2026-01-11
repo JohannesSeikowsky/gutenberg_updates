@@ -38,10 +38,19 @@ errors_file = f"errors/errors_{month_year}.txt"
 
 for book_id in range(start_id + 1, end_id + 1):
     # Fetch all relevant data from Gutenberg once
+    # @Rowan - IMPORTANT NOTE - The pipeline relies on the data as it's extracted in the code below. "title" for example is a scraping of the h1 tag of the page of the particular book, meaning it includes the book's title and also its author. "language" is obvious. "authors" and thus "author_str" also include translators, editors etc, but it's made obvious who the main author is! These details are very important for the various LLM layers to do their job well. The pipeline is tried and tested the way it is now. If you change the input data to the pipeline in any way, you'll need to carefully consider what adjustments will need to be made in the pipeline.
+
+    # Example 1: If you switch "title" to be the title from the db rather than the h1, Serper/Google will likely do a worse job since it isn't given the author. And ff you give it author_str as a supplement, it may get confused because editors, translators etc are all included as well. (the h1 make a pretty good google search query).
+    
+    # Example 2: generate_wiki_based_summary() ensures that a wiki-based summary uses that h1 tag as the name of the work within the summary. If you don't do that, there is a good chance that for some summaries there will be a discrepancy between the h1 and the summary - which is just awkward. I've seen that.
+    # etc etc
+
+    # Overall - be careful with changing the input data. If you change it, odds are that the pipeline will need to be adjusted too. That may be worthwhile - or not.
+
     book_content = get_book_content(book_id)
-    title, language, authors, _ = get_book_metadata(book_id)
-    # It's important that it's clear in author_str who the main author is versus who the editors, translators etc. are. Else Claude will likely get confused when doing the "deep" validation.
+    title, language, authors = get_book_metadata(book_id)
     authors_str = ", ".join([a['name'] for a in authors]) if authors else ""
+
 
     # Print book header
     separator = "═" * 60

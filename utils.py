@@ -65,9 +65,9 @@ def get_book_content(book_id):
 
 
 def get_book_metadata(book_id):
-    """Return tuple: (title, language, authors, has_wiki_link) for the given book."""
+    """Return tuple: (title, language, authors) for the given book."""
     url = f"https://www.gutenberg.org/ebooks/{book_id}"
-    metadata = {'title': None, 'language': None, 'authors': [], 'has_wiki_link': False}
+    metadata = {'title': None, 'language': None, 'authors': []}
 
     try:
         response = requests.get(
@@ -85,9 +85,9 @@ def get_book_metadata(book_id):
 
         bibrec_table = soup.find('table', class_='bibrec')
         if not bibrec_table:
-            return metadata['title'], metadata['language'], metadata['authors'], metadata['has_wiki_link']
+            return metadata['title'], metadata['language'], metadata['authors']
 
-        # Extract language, authors, and check for Wikipedia link
+        # Extract language and authors
         author_roles = ['Author', 'Editor', 'Translator', 'Contributor', 'Illustrator']
         for row in bibrec_table.find_all('tr'):
             header_cell = row.find('th')
@@ -122,14 +122,10 @@ def get_book_metadata(book_id):
                         'role': role
                     })
 
-            # Check for Wikipedia link
-            if 'wikipedia.org' in str(row):
-                metadata['has_wiki_link'] = True
-
     except requests.RequestException:
         print("Error: Failed to fetch book metadata")
 
-    return metadata['title'], metadata['language'], metadata['authors'], metadata['has_wiki_link']
+    return metadata['title'], metadata['language'], metadata['authors']
 
 
 # State management functions
